@@ -183,7 +183,13 @@
       failCaptcha: p => `A biztonsági ellenőrzés nem sikerült. Kérjük, töltse újra az oldalt, és küldje el ismét – vagy hívjon: ${p}.`,
       failInvalid: p => `Kérjük, ellenőrizze az adatokat (e-mail, telefonszám, dátum – legfeljebb 180 nappal előre). Ha minden helyes, hívjon: ${p}.`,
       sending: 'Küldés folyamatban…',
-      langName: 'magyar'
+      langName: 'magyar',
+      bk: {
+        eyebrow: 'Foglalási kérés elküldve', thanks: n => `Köszönjük, ${n}!`,
+        guests: 'Létszám', g: n => `${n} fő`, name: 'Név', phone: 'Telefon', email: 'E-mail', note: 'Egyéb kérés', addr: 'Cím', id: 'Azonosító',
+        info: p => `Hamarosan e-mailben visszaigazoljuk a foglalást – addig ez még csak kérés. Ha valami változik, hívjon minket: ${p}.`,
+        ok: 'Rendben', close: 'Bezárás', locale: 'hu-HU'
+      }
     },
     en: {
       open: () => `Open now · until ${HOURS.close}`, closed: () => `Closed now · opens at ${HOURS.open}`,
@@ -197,7 +203,13 @@
       failCaptcha: p => `The security check did not succeed. Please reload the page and send it again – or call us on ${p}.`,
       failInvalid: p => `Please check your details (email, phone number, date – at most 180 days ahead). If everything is correct, please call ${p}.`,
       sending: 'Sending…',
-      langName: 'angol'
+      langName: 'angol',
+      bk: {
+        eyebrow: 'Booking request sent', thanks: n => `Thank you, ${n}!`,
+        guests: 'Guests', g: n => `${n} ${n == 1 ? 'guest' : 'guests'}`, name: 'Name', phone: 'Phone', email: 'Email', note: 'Requests', addr: 'Address', id: 'Reference',
+        info: p => `We will confirm your booking by email shortly – until then it is a request. If anything changes, please call us on ${p}.`,
+        ok: 'OK', close: 'Close', locale: 'en-GB'
+      }
     }
   };
 

@@ -655,6 +655,7 @@
     const data = Object.fromEntries(new FormData(form));
     data.guests = guests;
     const shownTime = timeLabel();   // pénteken / szombaton este a sáv: „19:00 – 21:00”
+    let bookedId = '';
     const summary = `Asztalfoglalás – Art of Sushi Bazilika
 Név: ${data.name}
 Email: ${data.email}
@@ -683,10 +684,12 @@ Nyelv: ${T('langName')}`;
         });
         const out = await res.json().catch(() => ({}));
         if (!res.ok || !out.ok) throw new Error(out.error || res.status);
+        bookedId = out.id || '';
       } else if (CONFIG.BOOKING_EMAIL) {
         location.href = `mailto:${CONFIG.BOOKING_EMAIL}?subject=${encodeURIComponent('Asztalfoglalás – Bazilika')}&body=${encodeURIComponent(summary)}`;
       }
       msg.classList.add('ok');
+      if (CONFIG.FORM_ENDPOINT) showBooked({ ...data, time: shownTime, guests, id: bookedId });
       msg.textContent = (CONFIG.FORM_ENDPOINT || CONFIG.BOOKING_EMAIL)
         ? T('sent', data.name, data.date, shownTime, guests, CONFIG.PHONE)
         : T('call', data.name, data.date, shownTime, guests, CONFIG.PHONE);
@@ -705,6 +708,50 @@ Nyelv: ${T('langName')}`;
       submitBtn.textContent = btnLabel;
     }
   });
+
+  /* ----- Sikeres foglalás: felugró ablak a foglalás adataival ----- */
+  function showBooked(b) {
+    const L = T('bk');
+    if (!L || typeof L !== 'object') return;
+    const esc = v => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    let day = b.date;
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(b.date || '');
+    if (m) try {
+      day = new Intl.DateTimeFormat(L.locale, { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' }).format(new Date(+m[1], m[2] - 1, +m[3]));
+    } catch {}
+    const rows = [[L.guests, L.g(b.guests)], [L.name, b.name], [L.phone, b.phone], [L.email, b.email]];
+    if (b.note) rows.push([L.note, b.note]);
+    rows.push([L.addr, 'Sas u. 4, 1051 Budapest']);
+    if (b.id) rows.push([L.id, b.id]);
+    const box = document.createElement('div');
+    box.className = 'booked';
+    box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-labelledby', 'booked-title');
+    box.innerHTML = `
+      <div class="booked__card">
+        <button type="button" class="booked__x" aria-label="${esc(L.close)}">×</button>
+        <p class="booked__eyebrow">${esc(L.eyebrow)}</p>
+        <h3 class="booked__title" id="booked-title">${esc(L.thanks(b.name))}</h3>
+        <div class="booked__when"><span class="booked__time">${esc(b.time)}</span><span class="booked__day">${esc(day)}</span></div>
+        <dl class="booked__rows">${rows.map(r => `<div><dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd></div>`).join('')}</dl>
+        <p class="booked__info">${esc(L.info(CONFIG.PHONE))}</p>
+        <button type="button" class="booked__ok">${esc(L.ok)}</button>
+      </div>`;
+    const last = document.activeElement;
+    const close = () => {
+      box.classList.remove('is-open');
+      body.classList.remove('is-locked');
+      removeEventListener('keydown', onKey);
+      setTimeout(() => box.remove(), 500);
+      last && last.focus && last.focus();
+    };
+    const onKey = e => { if (e.key === 'Escape') close(); };
+    box.addEventListener('click', e => { if (e.target === box || e.target.closest('.booked__x, .booked__ok')) close(); });
+    addEventListener('keydown', onKey);
+    document.body.appendChild(box);
+    body.classList.add('is-locked');
+    requestAnimationFrame(() => requestAnimationFrame(() => box.classList.add('is-open')));
+    $('.booked__ok', box).focus({ preventScroll: true });
+  }
 
   /* ----- Süti értesítő ----- */
   const cookie = $('.cookie');
