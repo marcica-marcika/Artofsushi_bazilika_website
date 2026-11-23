@@ -5,15 +5,18 @@
 ## 这份代码是怎么来的
 旧仓库拉不下来，本地和项目里的副本都停在 11 月 4–6 日，所以网站文件是 **2026-11-20 从线上 artofsushibp.hu 完整下载** 的，内容和线上一模一样（含菜单 PDF、图库、菜单分类图）。
 
-- 这是**构建后的成品**：直接作为静态网站发布即可，不需要构建命令。
-- `_headers`（安全头、pages.dev 不收录）和 `_redirects`（/foglalas）是按线上实际行为重新写的，因为 Cloudflare 不会公开这两个文件。
-- `apps-script/Code.gs` 是项目里保存的 11 月 12 日版本；**以 Google Apps Script 编辑器里正在运行的那份为准**。
-- 旧仓库里的 Pages CMS 后台（`.pages.yml`、`content/*.json`、`scripts/build.mjs` 和 HTML 里的 `data-cms` 标记）还没有恢复，所以现在老板后台改不了这份网站。
+- `apps-script/Code.gs` 是项目里保存的版本；**以 Google Apps Script 编辑器里正在运行的那份为准**。
 
-## 发布（Cloudflare Pages）
-- 构建命令：留空
-- 输出目录：`/`（仓库根目录）
-- 生产分支：`main`
+## 老板后台（Pages CMS）· 2026-11-23 恢复
+- 后台地址 https://app.pagescms.org ，配置在 `.pages.yml`，内容在 `content/*.json`（营业信息、价格、公告、菜单分类、主厨推荐、画廊、介绍文字）。
+- `bazilika.html` 和 `index.html` 是**带 `data-cms` 标记的源文件**；`scripts/build.mjs` 把 content 写进去，输出到 `dist/`（不进仓库）。
+- 本地预览：`node scripts/build.mjs`，然后打开 `dist/` 里的网页。
+- 构建会检查：时间格式、价格数字、公告日期、照片是否存在。出错时部署停止，线上继续显示上一版。
+- 改网页结构时，保留 `data-cms*` 标记；新增日文字要加进 `scripts/jp-chars.txt` 并重新做字体子集。
+
+## 发布（Cloudflare Worker `artofsushibp`）
+- 推送到生产分支后自动部署：`npx wrangler deploy` 会先运行 `wrangler.jsonc` 里的 `build.command`（`node scripts/build.mjs`），再上传 `dist/`。
+- 生产分支：`claude/project-thread-qswdtt`（仓库默认分支）。Pages CMS 保存也是提交到这个分支。
 
 ## 菜单二维码
 打印出来的二维码指向 `/menu/etlap-hu.pdf` 和 `/menu/menu-en.pdf`，这两个路径不要改。
