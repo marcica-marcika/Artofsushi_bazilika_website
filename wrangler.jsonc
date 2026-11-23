@@ -1,0 +1,10 @@
+// Cloudflare Workers（静态网站）配置：整个仓库根目录就是网站，不需要构建。
+{
+  "name": "artofsushi-bazilika-website",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}
