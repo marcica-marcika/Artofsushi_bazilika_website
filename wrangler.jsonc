@@ -1,9 +1,16 @@
-// Cloudflare Workers（静态网站）配置：整个仓库根目录就是网站，不需要构建。
+// Cloudflare Workers（静态网站）配置。
+// 每次部署（npx wrangler deploy）前先运行 scripts/build.mjs：把 content/*.json（老板在 Pages CMS 后台改的内容）写进网页，输出到 dist/。
+// 构建失败（比如时间格式填错、照片不存在）时部署会停止，线上继续显示上一版。
 {
   "name": "artofsushibp",
   "compatibility_date": "2026-11-01",
+  // 分支 / PR 预览（Cloudflare 的 npx wrangler preview 需要这一项，可以为空）
+  "previews": {},
+  "build": {
+    "command": "node scripts/build.mjs"
+  },
   "assets": {
-    "directory": "./",
+    "directory": "./dist",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page"
   }
