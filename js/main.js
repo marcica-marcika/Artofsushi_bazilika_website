@@ -591,13 +591,28 @@
   const far = new Date(today); far.setDate(far.getDate() + 180); // a szerver is legfeljebb 180 napot fogad el
   date.max = `${far.getFullYear()}-${pad(far.getMonth() + 1)}-${pad(far.getDate())}`;
   const formShown = Date.now(); // robotszűrés: 3 mp-en belül beküldött űrlapot a szerver eldob
-  // időpontok félóránként, nyitástól zárás előtt 2 óráig
-  for (let x = Math.ceil(CONFIG.OPEN_HOUR * 2) / 2; x <= CONFIG.CLOSE_HOUR - 2; x += .5) {
-    {
+  // időpontok félóránként, nyitástól zárás előtt 2 óráig;
+  // péntek és szombat este helyette kétórás sávok (17:00–19:00, 19:00–21:00) — a szerver ugyanígy jelöli
+  const SLOT_DAYS = [5, 6], SLOT_FROM = 17, SLOTS = [['17:00', '19:00'], ['19:00', '21:00']];
+  const slotDay = () => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date.value);
+    return !!m && SLOT_DAYS.includes(new Date(+m[1], m[2] - 1, +m[3]).getDay());
+  };
+  const fillTimes = () => {
+    const prev = time.value, slots = slotDay();
+    time.length = 0;
+    for (let x = Math.ceil(CONFIG.OPEN_HOUR * 2) / 2; x <= CONFIG.CLOSE_HOUR - 2; x += .5) {
+      if (slots && x >= SLOT_FROM) break;
       const v = `${pad(Math.floor(x) % 24)}:${pad(x % 1 ? 30 : 0)}`;
-      time.add(new Option(v, v, v === '19:00', v === '19:00'));
+      time.add(new Option(v, v));
     }
-  }
+    if (slots) SLOTS.forEach(([a, b]) => time.add(new Option(`${a} – ${b}`, a)));
+    const vals = [...time.options].map(o => o.value);
+    time.value = vals.includes(prev) ? prev : vals.includes('19:00') ? '19:00' : vals[vals.length - 1];
+  };
+  fillTimes();
+  ['input', 'change'].forEach(e => date.addEventListener(e, fillTimes));
+  const timeLabel = () => (time.selectedOptions[0] || {}).text || time.value;
   let guests = 2;
   $$('.guests button', form).forEach(b => b.addEventListener('click', () => {
     guests = Math.min(30, Math.max(1, guests + +b.dataset.step));
@@ -637,11 +652,12 @@
     if (!ok) { msg.classList.add('err'); msg.textContent = T('formErr'); return; }
     const data = Object.fromEntries(new FormData(form));
     data.guests = guests;
+    const shownTime = timeLabel();   // pénteken / szombaton este a sáv: „19:00 – 21:00”
     const summary = `Asztalfoglalás – Art of Sushi Bazilika
 Név: ${data.name}
 Email: ${data.email}
 Telefon: ${data.phone}
-Dátum: ${data.date} ${data.time}
+Dátum: ${data.date} ${shownTime}
 Létszám: ${data.guests} fő
 Egyéb kérés: ${data.note || '-'}
 Nyelv: ${T('langName')}`;
@@ -670,10 +686,10 @@ Nyelv: ${T('langName')}`;
       }
       msg.classList.add('ok');
       msg.textContent = (CONFIG.FORM_ENDPOINT || CONFIG.BOOKING_EMAIL)
-        ? T('sent', data.name, data.date, data.time, guests, CONFIG.PHONE)
-        : T('call', data.name, data.date, data.time, guests, CONFIG.PHONE);
+        ? T('sent', data.name, data.date, shownTime, guests, CONFIG.PHONE)
+        : T('call', data.name, data.date, shownTime, guests, CONFIG.PHONE);
       rid = newRid();
-      form.reset(); guests = 2; guestsOut.textContent = 2; time.value = '19:00'; syncDate();
+      form.reset(); guests = 2; guestsOut.textContent = 2; fillTimes(); time.value = '19:00'; syncDate();
       if (window.turnstile) try { turnstile.reset(); } catch {}
     } catch (err) {
       msg.classList.add('err');

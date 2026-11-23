@@ -10,6 +10,10 @@
  *  - a következő 7 nap mindegyikének saját lapja („11.08”), élőben a fő lapból
  *  - minden éjjel törli az elmúlt nap foglalásait és lapját, és létrehozza a 7. napot
  *  - 10 percenként megnézi a Gmailt: ha egy vendég írt és még nem válaszoltunk, a „Levél” oszlopban jelzi (link a levélre)
+ *  - péntek és szombat este kétórás sávok: 17:00–19:00, 19:00–21:00 (a weboldal 17:00 / 19:00 értéket küld)
+ *  - „🔔 Új foglalás figyelő” oldalsáv: új foglaláskor hang + felugró ablak a táblázatban
+ *  - levelek: Brevo (ha be van állítva, napi 300 ingyen) → különben Gmail (napi ~100);
+ *    ha a keret elfogyott, az állapot mégis átáll, a levél „⏳ függőben” marad és később magától kimegy
  *
  * Telepítés: apps-script/README.md
  */
@@ -26,6 +30,11 @@ const CFG = {
   MAX_PER_HOUR: 20,        // összesen ennyi új foglalás óránként (védi a napi ~100 e-mailes Gmail-keretet)
   MAX_PER_GUEST_DAY: 3,    // ugyanarról az e-mail címről / telefonszámról naponta legfeljebb ennyi
   MIN_FILL_MS: 3000,       // ennél gyorsabban kitöltött űrlap = robot
+  SLOT_DAYS: [5, 6],       // péntek, szombat: este kétórás sávok
+  SLOTS: { '17:00': '17:00–19:00', '19:00': '19:00–21:00' },
+  GMAIL_RESERVE: 15,       // csak Gmail esetén: a vendég automatikus „megkaptuk” levele csak akkor megy, ha ennél több marad (a visszaigazolásoknak)
+  NOTIFY_RESERVE: 40,      // a bolt értesítője Gmailből csak akkor, ha ennél több marad
+  POLL_SEC: 15,            // az oldalsáv ilyen gyakran nézi, jött-e új foglalás
   BACKUP_KEEP_DAYS: 14     // a „Mentés 备份” biztonsági lapok ennyi nap után törlődnek (személyes adatok!)
 };
 
@@ -105,6 +114,7 @@ function doPost(e) {
       put('Nyelv', b.lang.toUpperCase());
       put('Azonosító', b.id);
       sh.appendRow(row);
+      rememberBooking_(b);   // az oldalsáv („🔔 figyelő”) innen tudja, hogy új foglalás jött
       formatRows_(sh);
       sortMain_(sh);
       syncNoteBoxes_(sh);
@@ -112,8 +122,9 @@ function doPost(e) {
     } finally { lock.releaseLock(); }
 
     // a foglalás már mentve van: egy e-mail hiba (pl. elfogyott a napi keret) ne jelenjen meg hibaként a vendégnek
+    // előbb a vendég levele (fontosabb), aztán a bolt értesítője (csak ha van rá keret)
+    try { sendGuest_('received', b, { reserve: CFG.GMAIL_RESERVE }); } catch (err) { console.error('guest', err); }
     try { notifyRestaurant_(b); } catch (err) { console.error('notify', err); }
-    try { if (MailApp.getRemainingDailyQuota() > 3) sendGuest_('received', b); } catch (err) { console.error('guest', err); }
     return json_({ ok: true, id: b.id });
   } catch (err) {
     console.error(err);
@@ -180,7 +191,9 @@ function clean_(d) {
   // az űrlap saját azonosítót küld (ugyanaz marad újrapróbálkozáskor) → így ugyanaz a kérés csak egyszer kerül be
   const rid = String(d.rid || '').toUpperCase();
   const id = /^[A-Z0-9]{8,16}$/.test(rid) ? rid : Utilities.getUuid().slice(0, 8).toUpperCase();
-  return { name, email, phone, date, time, note, guests, lang, dateObj, id };
+  // péntek / szombat este: a 17:00 és 19:00 kétórás sáv („17:00–19:00”) — így kerül a táblázatba és a levelekbe
+  const slot = CFG.SLOT_DAYS.indexOf(dateObj.getDay()) >= 0 ? CFG.SLOTS[time] : '';
+  return { name, email, phone, date, time: slot || time, note, guests, lang, dateObj, id };
 }
 
 /* =========================================================
@@ -226,7 +239,7 @@ const LBL = {
 
 function esc_(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 
-function sendGuest_(kind, b) {
+function sendGuest_(kind, b, opts) {
   const T = TPL[kind][b.lang], l = LBL[b.lang];
   const t = Object.assign({}, T, { lead: typeof T.lead === 'function' ? T.lead(b) : T.lead });
   const rows = [[l.date, fmtDate_(b.dateObj, b.lang)], [l.time, b.time], [l.guests, l.g(b.guests)], [l.addr, CFG.ADDRESS]];
@@ -248,11 +261,15 @@ function sendGuest_(kind, b) {
     <p style="font-family:Arial,sans-serif;font-size:14px">${esc_(l.bye)}<br>${CFG.RESTAURANT}</p>
     <p style="font-family:Arial,sans-serif;font-size:12px;color:#80786a">${CFG.ADDRESS} · <a href="${CFG.SITE}" style="color:#9a7a3f">artofsushibp.hu</a></p>
   </div>`;
-  MailApp.sendEmail({ to: b.email, subject: `${t.subject} – ${CFG.RESTAURANT}`, body: plain, htmlBody: html, name: CFG.RESTAURANT, replyTo: prop_('NOTIFY_EMAIL') || undefined });
+  return sendMail_({ to: b.email, subject: `${t.subject} – ${CFG.RESTAURANT}`, body: plain, htmlBody: html, name: CFG.RESTAURANT, replyTo: shopEmail_() }, opts);
 }
 
+// A bolt értesítő levele. NOTIFY_MAIL: „on” = mindig (ha van keret), „off” = soha,
+// üres = csak ha Brevo be van állítva (Gmail-keretet nem költünk rá — a táblázat oldalsávja hanggal jelez)
 function notifyRestaurant_(b) {
-  const to = prop_('NOTIFY_EMAIL') || Session.getEffectiveUser().getEmail();
+  const mode = prop_('NOTIFY_MAIL').toLowerCase();
+  if (mode === 'off' || (mode !== 'on' && !brevoOn_())) return;
+  const to = shopEmail_();
   const url = SpreadsheetApp.getActive().getUrl();
   const body = [
     `Új foglalás (${b.id})`, '',
@@ -265,8 +282,222 @@ function notifyRestaurant_(b) {
     url, '',
     `Erre a levélre válaszolva közvetlenül a vendégnek ír.`
   ].join('\n');
-  MailApp.sendEmail({ to, subject: `${b.flag ? '⚠ ' : ''}Új foglalás: ${b.date} ${b.time}, ${b.guests} fő – ${b.name}`, body, replyTo: b.email, name: 'Foglalás – weboldal' });
+  sendMail_({ to, subject: `${b.flag ? '⚠ ' : ''}Új foglalás: ${b.date} ${b.time}, ${b.guests} fő – ${b.name}`, body, replyTo: b.email, name: 'Foglalás – weboldal' }, { reserve: CFG.NOTIFY_RESERVE });
 }
+
+/* ---------- Levélküldés: Brevo (ha be van állítva) → Gmail → ha egyik sem: MAIL_QUOTA hiba ----------
+   Brevo: ingyenes, napi 300 levél, saját domainről (pl. foglalas@artofsushibp.hu). Script properties:
+     BREVO_API_KEY  – Brevo → SMTP & API → API keys
+     BREVO_SENDER   – a Brevóban hitelesített feladó, pl. foglalas@artofsushibp.hu
+   A vendég válasza mindig a bolt Gmail-címére megy (Reply-To), így a „Levél” oszlop ugyanúgy működik. */
+const QUOTA_ERR = 'MAIL_QUOTA';
+const BREVO_DAILY = 300;
+function shopEmail_() { return prop_('NOTIFY_EMAIL') || Session.getEffectiveUser().getEmail(); }
+function brevoOn_() { return !!(prop_('BREVO_API_KEY') && prop_('BREVO_SENDER')); }
+function gmailLeft_() { try { return MailApp.getRemainingDailyQuota(); } catch (e) { return 0; } }
+function mailDay_() { return 'mailcnt_' + Utilities.formatDate(new Date(), 'Europe/Budapest', 'yyyyMMdd'); }
+function mailCounts_() { try { return JSON.parse(prop_(mailDay_()) || '{}'); } catch (e) { return {}; } }
+function countMail_(via) {
+  const c = mailCounts_(); c[via] = (c[via] || 0) + 1;
+  PropertiesService.getScriptProperties().setProperty(mailDay_(), JSON.stringify(c));
+}
+
+// m: { to, subject, body, htmlBody, name, replyTo }; opts.reserve: Gmailből csak akkor, ha utána is marad ennyi
+function sendMail_(m, opts) {
+  opts = opts || {};
+  if (brevoOn_() && (mailCounts_().brevo || 0) < BREVO_DAILY) {
+    try { sendBrevo_(m); countMail_('brevo'); return 'brevo'; }
+    catch (err) { console.error('brevo', err); }   // pl. elfogyott / hibás kulcs: Gmail próbálja
+  }
+  if (gmailLeft_() > (opts.reserve || 0)) {
+    MailApp.sendEmail(Object.assign({}, m, { replyTo: m.replyTo || undefined }));
+    countMail_('gmail');
+    return 'gmail';
+  }
+  throw new Error(QUOTA_ERR);
+}
+
+function sendBrevo_(m) {
+  const payload = { sender: { name: m.name || CFG.RESTAURANT, email: prop_('BREVO_SENDER') }, to: [{ email: m.to }], subject: m.subject, textContent: m.body };
+  if (m.htmlBody) payload.htmlContent = m.htmlBody;
+  if (m.replyTo) payload.replyTo = { email: m.replyTo };
+  const r = UrlFetchApp.fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'post', contentType: 'application/json', payload: JSON.stringify(payload), muteHttpExceptions: true,
+    headers: { 'api-key': prop_('BREVO_API_KEY'), accept: 'application/json' }
+  });
+  const code = r.getResponseCode();
+  if (code < 200 || code >= 300) throw new Error(`Brevo ${code}: ${r.getContentText().slice(0, 200)}`);
+}
+
+// a keret egy sorban (oldalsáv, menü)
+function quotaLine_() {
+  const c = mailCounts_(), pend = pendingCount_();
+  const parts = [`Gmail: ${gmailLeft_()} maradt · 剩余`];
+  if (brevoOn_()) parts.unshift(`Brevo: ${Math.max(BREVO_DAILY - (c.brevo || 0), 0)}/${BREVO_DAILY}`);
+  if (pend) parts.push(`⏳ ${pend} függőben · 待发`);
+  return 'Levélkeret ma · 今日邮件额度 — ' + parts.join(' · ');
+}
+function menuQuota() {
+  const c = mailCounts_();
+  SpreadsheetApp.getUi().alert('Levélkeret · 邮件额度',
+    quotaLine_() + `\n\nMa elküldve · 今天已发: Brevo ${c.brevo || 0}, Gmail ${c.gmail || 0}` +
+    (brevoOn_() ? '' : '\n\nBrevo nincs beállítva — csak a Gmail napi ~100 levele. · 还没设置 Brevo，只有 Gmail 每天约 100 封。'),
+    SpreadsheetApp.getUi().ButtonSet.OK);
+}
+
+/* ---------- Függő levelek: keret nélkül visszaigazolt / elutasított foglalások ----------
+   Az állapot átáll, a „Levél” oszlopban „⏳ Levél függőben”, és a 10 perces ellenőrzés kiküldi, amint van keret. */
+const PEND = 'pend_', PEND_MARK = '⏳', PEND_TEXT = '⏳ Levél függőben · 邮件待补发', PEND_BG = '#f9d6d5';
+function pendKey_(id, email) { return PEND + (String(id || '').trim() || String(email || '').trim().toLowerCase()); }
+function pendingCount_() { return Object.keys(PropertiesService.getScriptProperties().getProperties()).filter(k => k.indexOf(PEND) === 0).length; }
+
+function menuFlushPending() {
+  const r = flushPending_();
+  SpreadsheetApp.getActive().toast(r.sent || r.left
+    ? `Elküldve · 已补发: ${r.sent}${r.left ? ` · Még függőben · 还剩: ${r.left} (nincs keret · 额度不够)` : ''}`
+    : 'Nincs függő levél · 没有待发邮件', 'Levél', 6);
+}
+
+function flushPending_() {
+  const out = { sent: 0, left: 0 };
+  const props = PropertiesService.getScriptProperties();
+  const all = props.getProperties();
+  const keys = Object.keys(all).filter(k => k.indexOf(PEND) === 0);
+  if (!keys.length) return out;
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(15000)) { out.left = keys.length; return out; }
+  try {
+    const sh = sheet_(), last = sh.getLastRow();
+    const rows = last > 1 ? sh.getRange(2, 1, last - 1, COLS.length).getValues() : [];
+    let noQuota = false;
+    for (const k of keys) {
+      let p; try { p = JSON.parse(all[k]); } catch (e) { props.deleteProperty(k); continue; }
+      const i = rows.findIndex(r => pendKey_(r[C['Azonosító'] - 1], r[C['Email'] - 1]) === k);
+      const want = p.kind === 'confirm' ? STATUS.OK : STATUS.NO;
+      const cell = i >= 0 ? sh.getRange(i + 2, C['Levél']) : null;
+      const clearMark = () => { if (cell && String(cell.getValue()).indexOf(PEND_MARK) === 0) cell.clearContent(); };
+      // a foglalás törölve lett, vagy azóta más az állapota: nem küldünk
+      if (i < 0 || rows[i][C['Állapot'] - 1] !== want) { props.deleteProperty(k); clearMark(); continue; }
+      if (noQuota) { out.left++; continue; }
+      const get = n => rows[i][C[n] - 1];
+      const b = {
+        name: get('Név'), email: get('Email'), time: fmtTime_(get('Időpont')), guests: get('Létszám'),
+        dateObj: new Date(get('Dátum')), note: guestNote_(get('Egyéb kérés')), reply: p.reply || '',
+        lang: String(get('Nyelv')).toLowerCase() === 'en' ? 'en' : 'hu'
+      };
+      try { sendGuest_(p.kind, b); }
+      catch (err) { out.left++; if (String(err && err.message) === QUOTA_ERR) noQuota = true; else console.error('pending', err); continue; }
+      props.setProperty(sentKey_(p.kind, get('Azonosító'), b.email), String(Date.now()));
+      props.deleteProperty(k);
+      clearMark();
+      out.sent++;
+    }
+  } finally { lock.releaseLock(); }
+  return out;
+}
+
+/* ---------- 🔔 Új foglalás figyelő (oldalsáv) ----------
+   Az Apps Script nem tud magától üzenni egy megnyitott táblázatnak, ezért az oldalsáv 15 mp-enként rákérdez.
+   Új foglaláskor: hangjelzés (ha egyszer rákattintottak a „Hang bekapcsolása” gombra) + felugró ablak + piros jelzés,
+   45 mp-enként újra csenget, amíg valaki meg nem nyomja a „Rendben” gombot. */
+const LAST = 'last_bookings';
+function rememberBooking_(b) {
+  const p = PropertiesService.getScriptProperties();
+  let list = []; try { list = JSON.parse(p.getProperty(LAST) || '[]'); } catch (e) {}
+  list.unshift({ id: b.id, at: Date.now(), date: fmtDate_(b.dateObj, 'hu'), time: b.time, name: String(b.name).slice(0, 60),
+    guests: b.guests, note: String(b.note || '').slice(0, 120), flag: !!b.flag });
+  p.setProperty(LAST, JSON.stringify(list.slice(0, 10)));
+}
+
+function showWatcher() {
+  SpreadsheetApp.getUi().showSidebar(HtmlService.createHtmlOutput(WATCH_HTML.replace('__POLL__', String(CFG.POLL_SEC * 1000)))
+    .setTitle('🔔 Új foglalás · 新订单'));
+}
+
+// az oldalsáv hívja: az utolsó „since” óta érkezett foglalások + hány „Új” van még + levélkeret
+function pollBookings(since) {
+  let list = []; try { list = JSON.parse(prop_(LAST) || '[]'); } catch (e) {}
+  const sh = sheet_(), last = sh.getLastRow();
+  const open = last > 1 ? sh.getRange(2, C['Állapot'], last - 1, 1).getValues().filter(r => r[0] === STATUS.NEW).length : 0;
+  return { latest: list.length ? list[0].at : 0, items: since >= 0 ? list.filter(x => x.at > since) : [], open, quota: quotaLine_() };
+}
+
+// felugró ablak a táblázat közepén
+function showBookingPopup(items) {
+  const rows = (items || []).slice(0, 5).map(x =>
+    `<div class="it"><div class="t">${esc_(x.date)} · <b>${esc_(x.time)}</b> · ${esc_(x.guests)} fő 人</div>` +
+    `<div class="n">${esc_(x.name)}</div>${x.note ? `<div class="m">${esc_(x.note)}</div>` : ''}${x.flag ? '<div class="m">⚠ Ugyanaz a vendég aznap már foglalt · 同一客人当天已订</div>' : ''}</div>`).join('');
+  const html = `<style>body{font:14px/1.45 Arial,sans-serif;margin:0;padding:6px 4px;color:#1d1b18}
+    .it{background:#fde7c3;border-radius:6px;padding:10px 12px;margin-bottom:8px}.t{font-size:15px}.n{font-size:17px;font-weight:bold;margin-top:2px}
+    .m{color:#5b554b;margin-top:4px;font-style:italic}button{width:100%;padding:11px;border:0;border-radius:6px;background:#0c0b0a;color:#e8dcc4;font:bold 14px Arial;cursor:pointer;margin-top:4px}</style>
+    ${rows}<button onclick="google.script.host.close()">Rendben · 知道了</button>`;
+  SpreadsheetApp.getUi().showModelessDialog(HtmlService.createHtmlOutput(html).setWidth(380).setHeight(Math.min(110 + 96 * Math.min((items || []).length, 5), 560)),
+    `🔔 Új foglalás · 新订单 (${(items || []).length})`);
+}
+
+const WATCH_HTML = `<!doctype html><html><head><base target="_top"><style>
+body{font:14px/1.45 Arial,sans-serif;margin:0;padding:14px;color:#1d1b18;background:#faf8f4}
+h1{font-size:15px;margin:0 0 4px}.sub{color:#80786a;font-size:12px;margin-bottom:12px}
+.btn{display:block;width:100%;padding:12px;border:0;border-radius:6px;background:#0c0b0a;color:#e8dcc4;font:bold 14px Arial;cursor:pointer}
+.btn.on{background:#d4edda;color:#1d1b18}
+.stat{margin:14px 0;padding:12px;border-radius:6px;background:#fff;border:1px solid #e8e2d6}.big{font-size:30px;font-weight:bold}
+.alert{display:none;margin:14px 0;padding:14px;border-radius:8px;background:#c0392b;color:#fff;animation:pulse .8s infinite alternate}
+.alert.show{display:block}@keyframes pulse{to{background:#e67e22}}
+.item{background:rgba(255,255,255,.16);border-radius:5px;padding:8px;margin-top:8px}
+.ok{margin-top:10px;background:#fff;color:#c0392b}
+.foot{font-size:11px;color:#80786a;margin-top:16px;line-height:1.6}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#bbb;margin-right:6px}.dot.live{background:#2ecc71}.dot.err{background:#c0392b}
+</style></head><body>
+<h1>🔔 Új foglalás figyelő · 新订单提醒</h1>
+<div class="sub">Hagyja nyitva ezt a panelt. · 请保持这个侧边栏打开，有新订单会响铃并弹窗。</div>
+<button class="btn" id="snd">🔊 Hang bekapcsolása · 点这里开启提示音</button>
+<div class="alert" id="al"><b>Új foglalás! · 新订单！</b><div id="list"></div><button class="btn ok" id="ack">Rendben · 知道了</button></div>
+<div class="stat"><div>Új, még nem kezelt · 待处理新订单</div><div class="big" id="open">–</div></div>
+<div class="foot"><span class="dot" id="dot"></span><span id="st">Kapcsolódás… · 连接中…</span><br><span id="q"></span></div>
+<script>
+var POLL = __POLL__, since = -1, ctx = null, soundOn = false, waiting = false, ring = null;
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+function chime() {
+  if (!ctx) return;
+  var t = ctx.currentTime;
+  [[880, 0], [1175, .18], [1568, .36]].forEach(function (n) {
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine'; o.frequency.value = n[0];
+    g.gain.setValueAtTime(0, t + n[1]); g.gain.linearRampToValueAtTime(.4, t + n[1] + .02); g.gain.exponentialRampToValueAtTime(.001, t + n[1] + .9);
+    o.connect(g); g.connect(ctx.destination); o.start(t + n[1]); o.stop(t + n[1] + 1);
+  });
+}
+$('snd').onclick = function () {
+  try { ctx = ctx || new (window.AudioContext || window.webkitAudioContext)(); ctx.resume(); soundOn = true; chime(); } catch (e) {}
+  $('snd').textContent = '🔊 Hang bekapcsolva · 提示音已开启（点一下试听）'; $('snd').className = 'btn on';
+};
+$('ack').onclick = function () { waiting = false; $('al').className = 'alert'; $('list').innerHTML = ''; clearInterval(ring); ring = null; };
+function alertNew(items) {
+  waiting = true;
+  $('list').innerHTML = items.map(function (x) {
+    return '<div class="item">' + esc(x.date) + ' <b>' + esc(x.time) + '</b> · ' + esc(x.guests) + ' fő 人<br><b>' + esc(x.name) + '</b>' + (x.note ? '<br><i>' + esc(x.note) + '</i>' : '') + '</div>';
+  }).join('') + $('list').innerHTML;
+  $('al').className = 'alert show';
+  if (soundOn) { chime(); setTimeout(chime, 1300); }
+  if (!ring) ring = setInterval(function () { if (waiting && soundOn) chime(); }, 45000);
+  google.script.run.showBookingPopup(items);
+}
+function poll() {
+  google.script.run.withSuccessHandler(function (r) {
+    $('dot').className = 'dot live';
+    $('st').textContent = 'Figyel · 监控中 ' + new Date().toLocaleTimeString('hu-HU');
+    $('open').textContent = r.open; $('q').textContent = r.quota;
+    if (since < 0) since = r.latest;
+    else if (r.items.length) { since = r.items[0].at; alertNew(r.items); }
+    setTimeout(poll, POLL);
+  }).withFailureHandler(function () {
+    $('dot').className = 'dot err'; $('st').textContent = 'Nincs kapcsolat, újrapróbálja… · 连接失败，稍后重试';
+    setTimeout(poll, POLL * 2);
+  }).pollBookings(since);
+}
+poll();
+</script></body></html>`;
 
 /* =========================================================
    3. Menü a táblázatban
@@ -280,9 +511,15 @@ function onOpen() {
     .addItem('✉ Levél kezelve · 邮件已处理', 'menuMailDone')
     .addItem('✉ Levelek ellenőrzése most · 立即检查邮件', 'menuCheckMail')
     .addSeparator()
+    .addItem('🔔 Új foglalás figyelő · 新订单提醒', 'showWatcher')
+    .addItem('📊 Levélkeret · 邮件额度', 'menuQuota')
+    .addItem('⏳ Függő levelek küldése · 补发待发邮件', 'menuFlushPending')
+    .addSeparator()
     .addItem('Ismétlődő foglalások törlése · 删除重复订单', 'removeDuplicates')
     .addItem('Beállítás / frissítés · 设置/更新', 'setup')
     .addToUi();
+  // a figyelő oldalsáv magától megnyílik (hang: egyszer rá kell kattintani a „Hang bekapcsolása” gombra)
+  try { showWatcher(); } catch (e) { console.warn('watcher', e); }
 }
 function menuConfirm() { actOnSelection_('confirm'); }
 function menuReject() { actOnSelection_('reject'); }
@@ -358,20 +595,33 @@ function decide_(sh, r, kind, edit) {
   }
   if (ui.alert(`${label.charAt(0).toUpperCase() + label.slice(1)} küld · 发送${zh}邮件:\n${b.name}, ${fmtDate_(b.dateObj, 'hu')} ${b.time}, ${b.guests} fő (${b.email})` +
     (b.reply ? `\n\nVálasz · 回复: ${b.reply}` : ''), ui.ButtonSet.YES_NO) !== ui.Button.YES) { undo(); return; }
+  let pending = false;
   try { sendGuest_(kind, b); }
   catch (err) {
-    console.error(err); undo();
-    ui.alert(`A levél nem ment el, az állapot nem változott.\n邮件没发出去，状态没改。\n\n${err && err.message || err}`);
-    return;
+    if (String(err && err.message) !== QUOTA_ERR) {
+      console.error(err); undo();
+      ui.alert(`A levél nem ment el, az állapot nem változott.\n邮件没发出去，状态没改。\n\n${err && err.message || err}`);
+      return;
+    }
+    // elfogyott a napi levélkeret: az állapot átáll, a levél később magától kimegy
+    pending = true;
+    props.setProperty(pendKey_(get('Azonosító'), b.email), JSON.stringify({ kind, reply: b.reply || '', at: Date.now() }));
   }
-  props.setProperty(key, String(Date.now()));
+  if (!pending) props.setProperty(key, String(Date.now()));
   stCell.setValue(target);
+  if (pending) {
+    sh.getRange(r, C['Levél']).setValue(PEND_TEXT);
+    ui.alert('Mai levélkeret elfogyott · 今天的邮件额度用完了',
+      `Az állapot átállt (${target}), a levél később magától kimegy, amint van keret (10 percenként próbálja).\n` +
+      `状态已改成「${target}」。邮件会在额度恢复后自动补发（每 10 分钟试一次），这一行的「Levél」格子会显示 ⏳。`, ui.ButtonSet.OK);
+  }
   if (b.reply) {                     // a kérésre válaszoltunk: a „📝 待回复” jelzés eltűnik
     props.setProperty(noteKey_(get('Azonosító'), b.email), String(Date.now()));
     const cell = sh.getRange(r, C['Levél']);
     if (String(cell.getValue()).indexOf(NOTE_MARK) === 0) cell.clearContent();
   }
   const gone = kind === 'confirm' ? cancelEarlierSameDay_(sh, r) : [];
+  if (pending) return;
   SpreadsheetApp.getActive().toast(gone.length
     ? `Elküldve. Korábbi foglalás törölve (mentve: „${BACKUP}”): ${gone.join(', ')} · 已发送，同一天的旧预约已删除并备份：${gone.join(', ')}`
     : 'Elküldve · 已发送', 'Foglalás', 8);
@@ -461,7 +711,7 @@ function setup() {
   sh.setFrozenRows(1);
   sh.getRange(1, 1, 1, COLS.length).setValues([COLS.map(c => LABELS[c])]);
   styleHeader_(sh.getRange(1, 1, 1, COLS.length));
-  const widths = { 'Dátum': 105, 'Időpont': 80, 'Név': 170, 'Létszám': 80, 'Telefon': 140, 'Email': 220, 'Egyéb kérés': 240, 'Állapot': 160, 'Levél': 300, 'Beérkezett': 140, 'Nyelv': 75, 'Azonosító': 95 };
+  const widths = { 'Dátum': 105, 'Időpont': 115, 'Név': 170, 'Létszám': 80, 'Telefon': 140, 'Email': 220, 'Egyéb kérés': 240, 'Állapot': 160, 'Levél': 300, 'Beérkezett': 140, 'Nyelv': 75, 'Azonosító': 95 };
   COLS.forEach((c, i) => sh.setColumnWidth(i + 1, widths[c]));
   formatRows_(sh);
   syncNoteBoxes_(sh);
@@ -473,6 +723,7 @@ function setup() {
   const all = sh.getRange(2, 1, sh.getMaxRows() - 1, COLS.length);
   sh.setConditionalFormatRules([selRule_(CFG.SHEET, all)].concat(colors.map(([t, c]) =>
     SpreadsheetApp.newConditionalFormatRule().whenTextEqualTo(t).setBackground(c).setRanges([st]).build()))
+    .concat(SpreadsheetApp.newConditionalFormatRule().whenTextStartsWith(PEND_MARK).setBackground(PEND_BG).setBold(true).setRanges([mail]).build())
     .concat(SpreadsheetApp.newConditionalFormatRule().whenTextStartsWith(NOTE_MARK).setBackground(NOTE_BG).setBold(true).setRanges([mail]).build())
     .concat(SpreadsheetApp.newConditionalFormatRule().whenCellNotEmpty().setBackground(MAIL_BG).setBold(true).setRanges([mail]).build())
     .concat(zebraRule_(all, colLetter_(C['Dátum']))));
@@ -650,7 +901,12 @@ function daily() {
   const nl = sh.getLastRow();
   const ids = new Set(nl > 1 ? sh.getRange(2, C['Azonosító'], nl - 1, 1).getValues().map(x => String(x[0])) : []);
   const props = PropertiesService.getScriptProperties();
-  Object.keys(props.getProperties()).forEach(k => { const m = k.match(/^sent_(confirm|reject)_(.*)$/); if (m && !ids.has(m[2])) props.deleteProperty(k); });
+  const today = mailDay_();
+  Object.keys(props.getProperties()).forEach(k => {
+    const m = k.match(/^sent_(confirm|reject)_(.*)$/);
+    if (m && !ids.has(m[2])) props.deleteProperty(k);
+    if (k.indexOf('mailcnt_') === 0 && k !== today) props.deleteProperty(k);   // tegnapi levélszámláló
+  });
   ensureDayTabs_();
 }
 
@@ -698,7 +954,7 @@ function buildDayTab_(s, d) {
   s.getRange(2, DAY_COLS.indexOf('Levél') + 1, s.getMaxRows() - 1, 1).setWrapStrategy(SpreadsheetApp.WrapStrategy.CLIP);
   s.getRange(2, DAY_COLS.indexOf('Egyéb kérés') + 1, s.getMaxRows() - 1, 1).setWrapStrategy(SpreadsheetApp.WrapStrategy.WRAP).setVerticalAlignment('top');
   s.getRange(2, DAY_COLS.indexOf('Időpont') + 1, s.getMaxRows() - 1, 1).setNumberFormat('@');
-  const dw = { 'Állapot': 160, 'Időpont': 80, 'Név': 170, 'Létszám': 80, 'Telefon': 140, 'Egyéb kérés': 260, 'Levél': 300 };
+  const dw = { 'Állapot': 160, 'Időpont': 115, 'Név': 170, 'Létszám': 80, 'Telefon': 140, 'Egyéb kérés': 260, 'Levél': 300 };
   DAY_COLS.forEach((c, i) => s.setColumnWidth(i + 1, dw[c]));
   const dst = s.getRange(2, DAY_COLS.indexOf('Állapot') + 1, s.getMaxRows() - 1, 1);
   const stA = dst.getCell(1, 1).getA1Notation();
@@ -709,6 +965,8 @@ function buildDayTab_(s, d) {
   s.getRange(2, DAY_COLS.indexOf('Egyéb kérés') + 1, s.getMaxRows() - 1, 1).setVerticalAlignment('top');
   s.setConditionalFormatRules([selRule_(s.getName(), dall)].concat(statusColors_().map(([t, c]) => SpreadsheetApp.newConditionalFormatRule()
     .whenFormulaSatisfied(`=${stA}="${t}"`).setBackground(c).setRanges([dst]).build())).concat([SpreadsheetApp.newConditionalFormatRule()
+    .whenFormulaSatisfied(`=LEFT(${mail.getCell(1, 1).getA1Notation()},1)="${PEND_MARK}"`).setBackground(PEND_BG).setBold(true).setRanges([mail]).build(),
+    SpreadsheetApp.newConditionalFormatRule()
     .whenFormulaSatisfied(`=REGEXMATCH(${mail.getCell(1, 1).getA1Notation()},"^${NOTE_MARK}")`).setBackground(NOTE_BG).setBold(true).setRanges([mail]).build(),
     SpreadsheetApp.newConditionalFormatRule()
     .whenFormulaSatisfied(`=LEFT(${mail.getCell(1, 1).getA1Notation()},1)="✉"`).setBackground(MAIL_BG).setBold(true).setRanges([mail]).build(),
@@ -868,8 +1126,15 @@ function menuReply() {
   const mail = replyMail_(b, text);
   let thread = null;
   if (threadId) { try { thread = GmailApp.getThreadById(threadId); } catch (e) { thread = null; } }
-  if (thread) thread.reply(mail.plain, { htmlBody: mail.html, name: CFG.RESTAURANT });   // a vendég levelezésébe
-  else MailApp.sendEmail({ to: b.email, subject: mail.subject, body: mail.plain, htmlBody: mail.html, name: CFG.RESTAURANT, replyTo: prop_('NOTIFY_EMAIL') || undefined });
+  try {
+    if (thread && gmailLeft_() > 0) { thread.reply(mail.plain, { htmlBody: mail.html, name: CFG.RESTAURANT }); countMail_('gmail'); }   // a vendég levelezésébe
+    else sendMail_({ to: b.email, subject: mail.subject, body: mail.plain, htmlBody: mail.html, name: CFG.RESTAURANT, replyTo: shopEmail_() });
+  } catch (err) {
+    ui.alert(String(err && err.message) === QUOTA_ERR
+      ? 'Mai levélkeret elfogyott, a válasz nem ment el. Írjon a Gmailből, vagy próbálja holnap.\n今天的邮件额度用完了，回复没发出去。请直接在 Gmail 里回复，或明天再试。'
+      : `A levél nem ment el · 邮件没发出去\n\n${err && err.message || err}`);
+    return;
+  }
 
   const props = PropertiesService.getScriptProperties(), now = String(Date.now());
   props.setProperty(mailKey_(get('Azonosító'), b.email), now);
@@ -930,6 +1195,7 @@ function menuMailDone() {
 
 // a fő feladat (időzítő hívja); visszaadja, hány foglalásnál van megválaszolatlan levél
 function checkMail() {
+  try { flushPending_(); } catch (e) { console.error('pending', e); }   // keret nélkül maradt levelek
   const lock = LockService.getScriptLock();
   if (!lock.tryLock(15000)) return 0;     // épp foglalás érkezik / fut valami: majd legközelebb
   try {
@@ -1013,6 +1279,10 @@ function checkMail() {
     rows.forEach((r, i) => {
       const h = hit[i];
       const now = cur[i][0], nowText = now ? now.getText() : '', nowLink = now ? now.getLinkUrl() : null;
+      if (all[pendKey_(r[C['Azonosító'] - 1], r[C['Email'] - 1])]) {   // a visszaigazoló / elutasító levél még nem ment ki
+        if (nowText !== PEND_TEXT || nowLink) col.getCell(i + 1, 1).setValue(PEND_TEXT);
+        return;
+      }
       if (!h && notes[i] != null) {                  // nincs új levél, de a kérés még válaszra vár
         count++;
         const text = noteFlag_(notes[i]);
