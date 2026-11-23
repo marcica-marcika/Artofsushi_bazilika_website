@@ -592,8 +592,8 @@
   date.max = `${far.getFullYear()}-${pad(far.getMonth() + 1)}-${pad(far.getDate())}`;
   const formShown = Date.now(); // robotszűrés: 3 mp-en belül beküldött űrlapot a szerver eldob
   // időpontok félóránként, nyitástól zárás előtt 2 óráig;
-  // péntek és szombat este helyette kétórás sávok (17:00–19:00, 19:00–21:00) — a szerver ugyanígy jelöli
-  const SLOT_DAYS = [5, 6], SLOT_FROM = 17, SLOTS = [['17:00', '19:00'], ['19:00', '21:00']];
+  // péntek és szombat este 17 és 21 óra között kétórás sávok (17:00–19:00, 19:00–21:00), utána ismét félóránként (21:30, 22:00)
+  const SLOT_DAYS = [5, 6], SLOT_FROM = 17, SLOT_TO = 21, SLOTS = [['17:00', '19:00'], ['19:00', '21:00']];
   const slotDay = () => {
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date.value);
     return !!m && SLOT_DAYS.includes(new Date(+m[1], m[2] - 1, +m[3]).getDay());
@@ -602,11 +602,13 @@
     const prev = time.value, slots = slotDay();
     time.length = 0;
     for (let x = Math.ceil(CONFIG.OPEN_HOUR * 2) / 2; x <= CONFIG.CLOSE_HOUR - 2; x += .5) {
-      if (slots && x >= SLOT_FROM) break;
+      if (slots && x >= SLOT_FROM && x <= SLOT_TO) {
+        if (x === SLOT_FROM) SLOTS.forEach(([a, b]) => time.add(new Option(`${a} – ${b}`, a)));
+        continue;
+      }
       const v = `${pad(Math.floor(x) % 24)}:${pad(x % 1 ? 30 : 0)}`;
       time.add(new Option(v, v));
     }
-    if (slots) SLOTS.forEach(([a, b]) => time.add(new Option(`${a} – ${b}`, a)));
     const vals = [...time.options].map(o => o.value);
     time.value = vals.includes(prev) ? prev : vals.includes('19:00') ? '19:00' : vals[vals.length - 1];
   };
