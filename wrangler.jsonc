@@ -4,6 +4,8 @@
 {
   "name": "artofsushibp",
   "compatibility_date": "2026-11-01",
+  // 分支 / PR 预览（Cloudflare 的 npx wrangler preview 需要这一项，可以为空）
+  "previews": {},
   "build": {
     "command": "node scripts/build.mjs"
   },
