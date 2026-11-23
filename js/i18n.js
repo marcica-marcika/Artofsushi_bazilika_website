@@ -8,6 +8,8 @@
   const TEXT = {
     // kezdőlap
     '01 — Új üzlet': '01 — New location',
+    'Budapest · Szent István-bazilika': 'Budapest · St Stephen’s Basilica',
+    'Belépés': 'Enter',
     'Cím': 'Address',
     'Nyitvatartás': 'Opening hours',
     'Hétfő – Vasárnap · 12:00 – 00:00': 'Monday – Sunday · 12:00 – 00:00',
@@ -123,6 +125,8 @@
   /* ---------- Attribútumok (alt, aria-label, kurzorfelirat, title) ---------- */
   const ATTR = {
     'Válasszon üzletet': 'Choose a location',
+    'Közösségi média': 'Social media',
+    'Jogi információk': 'Legal information',
     'Art of Sushi Bazilika – kezdőlap': 'Art of Sushi Bazilika – home',
     'Menü megnyitása': 'Open menu',
     'Menü bezárása': 'Close menu',
@@ -153,6 +157,8 @@
 
   /* ---------- Oldalcím és leírás ---------- */
   const META = {
+    'Art of Sushi Bazilika – korlátlan prémium sushi a Szent István-bazilika mellett. Budapest, Sas u. 4, 1051. Nyitva minden nap 12:00–00:00.':
+      'Art of Sushi Bazilika – all-you-can-eat premium sushi beside St Stephen’s Basilica. Budapest, Sas u. 4, 1051. Open daily 12:00–00:00.',
     'Art of Sushi · Budapest · Bazilika & Liszt Ferenc tér': 'Art of Sushi · Budapest · Bazilika & Liszt Ferenc tér',
     'Art of Sushi Budapesten – két üzlet: az új Bazilika üzlet (Sas u. 4, 1051) és a Liszt Ferenc téri üzlet (Liszt Ferenc tér 5, 1061).':
       'Art of Sushi in Budapest – two restaurants: our new Bazilika location (Sas u. 4, 1051) and Liszt Ferenc tér (Liszt Ferenc tér 5, 1061).',
