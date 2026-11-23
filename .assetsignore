@@ -5,3 +5,4 @@ wrangler.jsonc
 README.md
 apps-script
 node_modules
+.wrangler
