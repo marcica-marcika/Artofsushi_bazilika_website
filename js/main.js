@@ -593,12 +593,12 @@
   const formShown = Date.now(); // robotszűrés: 3 mp-en belül beküldött űrlapot a szerver eldob
   // időpontok félóránként, nyitástól zárás előtt 2 óráig – kivéve:
   //  • 2026-11-28-tól péntek, szombat, vasárnap: 16 óráig félóránként, utána kétórás sávok
-  //    (16:00–18:00, 18:00–20:00, 20:00–22:00), majd 22:00 és 22:30 
+  //    (16:00–18:00, 18:00–20:00, 20:00–22:00), majd 22:00 
   //  • 2026-11-27-ig péntek és szombat: 17:00–19:00, 19:00–21:00, utána félóránként (21:30, 22:00)
   //  • 22:00 / 22:30 választásakor figyelmeztetés: a konyha 23:00-kor zár (minden nap, kivéve febr. 14.)
   //  • minden év február 14.: csak 12:00, 14:00, 16:00, 18:00, 20:00, 22:00 (nincs 22:30, nincs figyelmeztetés)
   const WEEKEND_FROM = '2026-11-28', WEEKEND_DAYS = [5, 6, 0], OLD_SLOT_DAYS = [5, 6];
-  const KITCHEN_LATE = ['22:00', '22:30'];
+  const KITCHEN_LATE = ['22:00', '22:30'];  // 22:30 jelenleg nincs a listában
   const hm = x => `${pad(Math.floor(x) % 24)}:${pad(x % 1 ? 30 : 0)}`;
   const range = (a, b) => [hm(a), `${hm(a)} – ${hm(b)}`];
   const halfHours = (from, to) => { const o = []; for (let x = from; x <= to; x += .5) o.push([hm(x), hm(x)]); return o; };
@@ -610,7 +610,7 @@
       return { list: [range(12, 14), range(14, 16), range(16, 18), range(18, 20), range(20, 22), [hm(22), hm(22)]] };
     const dow = new Date(+m[1], m[2] - 1, +m[3]).getDay();
     if (v >= WEEKEND_FROM && WEEKEND_DAYS.includes(dow))
-      return { list: [...halfHours(first, 15.5), range(16, 18), range(18, 20), range(20, 22), [hm(22), hm(22)], [hm(22.5), hm(22.5)]], kitchen: true };
+      return { list: [...halfHours(first, 15.5), range(16, 18), range(18, 20), range(20, 22), [hm(22), hm(22)]], kitchen: true };
     if (v < WEEKEND_FROM && OLD_SLOT_DAYS.includes(dow))
       return { list: [...halfHours(first, 16.5), range(17, 19), range(19, 21), ...halfHours(21.5, last)], kitchen: true };
     return { list: halfHours(first, last), kitchen: true };

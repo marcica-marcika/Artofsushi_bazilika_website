@@ -31,7 +31,7 @@ const CFG = {
   MIN_FILL_MS: 3000,       // ennél gyorsabban kitöltött űrlap = robot
   SLOT_DAYS: [5, 6],       // 2026-11-27-ig péntek, szombat: este kétórás sávok
   SLOTS: { '17:00': '17:00–19:00', '19:00': '19:00–21:00' },
-  WEEKEND_FROM: '2026-11-28',  // ettől péntek, szombat, vasárnap: 16–18, 18–20, 20–22, majd 22:00, 22:30
+  WEEKEND_FROM: '2026-11-28',  // ettől péntek, szombat, vasárnap: 16–18, 18–20, 20–22, majd 22:00
   WEEKEND_DAYS: [5, 6, 0],
   WEEKEND_SLOTS: { '16:00': '16:00–18:00', '18:00': '18:00–20:00', '20:00': '20:00–22:00' },
   VALENTINE_SLOTS: { '12:00': '12:00–14:00', '14:00': '14:00–16:00', '16:00': '16:00–18:00', '18:00': '18:00–20:00', '20:00': '20:00–22:00' },
