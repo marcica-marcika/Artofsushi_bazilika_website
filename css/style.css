@@ -473,6 +473,58 @@ html:not(.js) .clip img{clip-path:none;transform:none}
 
 /* Csökkentett mozgás: nincsenek rögzített jelenetek */
 .reduce .hero{height:auto}
+
+/* ---------- szöveges nyitás (kép nélkül) ---------- */
+.hero--text{height:auto;min-height:100vh;min-height:100svh;padding:0;display:grid;place-items:center;position:relative;overflow:hidden;
+  background:radial-gradient(ellipse 70% 55% at 50% 46%,rgba(196,164,108,.075),transparent 70%)}
+.ht{position:relative;z-index:1;width:min(1100px,90vw);padding:120px 0 110px;text-align:center}
+.ht .mask{display:block;overflow:hidden;padding-bottom:.06em}
+.ht .mask>span{display:block;transform:translateY(110%);transition:transform 1.6s var(--ease)}
+.intro-in .ht .mask>span{transform:none}
+.ht__eyebrow{margin:0 0 34px;font:500 10.5px var(--f-body);letter-spacing:.42em;text-transform:uppercase;color:var(--gold)}
+.ht__title{margin:0;font:300 clamp(64px,10.5vw,172px)/.92 var(--f-display);letter-spacing:-.02em}
+.ht__title em{color:var(--gold)}
+.ht__title .mask:nth-child(2)>span{transition-delay:.12s}
+.ht__rule{display:block;width:1px;height:56px;margin:38px auto;background:linear-gradient(var(--gold),transparent);transform:scaleY(0);transform-origin:top;transition:transform 1.4s var(--ease) .5s}
+.intro-in .ht__rule{transform:none}
+.ht__sub{margin:0 0 44px;font:300 clamp(20px,2vw,28px)/1.45 var(--f-display);color:var(--text-2)}
+.ht__sub em{color:var(--text)}
+.ht__cta{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.ht__fade{opacity:0;transform:translateY(18px);transition:opacity 1.4s var(--ease),transform 1.4s var(--ease)}
+.intro-in .ht__fade{opacity:1;transform:none}
+.ht__eyebrow.ht__fade{transition-delay:.15s}.ht__sub.ht__fade{transition-delay:.7s}.ht__facts.ht__fade{transition-delay:.9s}.ht__cta.ht__fade{transition-delay:1.05s}
+/* tények sora */
+.ht__facts{list-style:none;margin:0 auto 46px;padding:22px 0;display:flex;justify-content:center;flex-wrap:wrap;gap:0;max-width:860px;border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft)}
+.ht__facts li{padding:4px clamp(14px,2.4vw,34px);display:flex;flex-direction:column;gap:8px}
+.ht__facts li+li{border-left:1px solid var(--line-soft)}
+.ht__facts small{font:500 9.5px var(--f-body);letter-spacing:.34em;text-transform:uppercase;color:var(--gold)}
+.ht__facts span{font:300 clamp(18px,1.7vw,24px)/1.1 var(--f-display);color:var(--text)}
+/* hal rajzolása */
+.ht__fish{display:block;width:clamp(92px,9vw,132px);margin:0 auto 30px;color:var(--gold);overflow:visible}
+.ht__fish path{fill:currentColor;fill-opacity:0;stroke:currentColor;stroke-width:1.4;stroke-dasharray:1;stroke-dashoffset:1}
+.intro-in .ht__fish path{animation:fishDraw 1.8s var(--ease-io) .1s forwards,fishFill 1s var(--ease) 1.5s forwards}
+.ht__fish .eye{stroke-width:3}
+.hero--text .hero__hint{display:none}
+.ht--full{padding:104px 0 64px}
+.ht--full .ht__title{font-size:clamp(56px,7.6vw,128px)}
+.ht--full .ht__eyebrow{margin-bottom:26px}
+.ht--full .ht__fish{width:clamp(84px,7vw,112px);margin-bottom:22px}
+.ht--full .ht__sub{margin:30px 0 34px}
+.ht--full .ht__facts{margin-bottom:38px}
+@keyframes fishDraw{to{stroke-dashoffset:0}}
+@keyframes fishFill{to{fill-opacity:1;stroke-width:.0001}}
+.reduce .ht__fish path{fill-opacity:1;stroke-dashoffset:0;animation:none}
+@media (max-width:720px){
+  .ht{padding:110px 0 90px}
+  .ht__title{font-size:clamp(54px,17vw,92px)}
+  .ht__facts{display:grid;grid-template-columns:1fr 1fr;padding:6px 0}
+  .ht__facts li{padding:16px 8px}
+  .ht__facts li+li{border-left:0}
+  .ht__facts li:nth-child(even){border-left:1px solid var(--line-soft)}
+  .ht__facts li:nth-child(n+3){border-top:1px solid var(--line-soft)}
+  .ht__cta .btn{flex:1 1 100%}
+}
+
 .reduce .hero__pin{position:relative;height:100svh}
 .reduce .hero__frame{clip-path:none}
 .reduce .hero__veil{opacity:1}

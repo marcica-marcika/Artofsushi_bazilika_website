@@ -1,0 +1,11 @@
+/* A: arany por */
+.ht__canvas{position:absolute;inset:0;z-index:0;pointer-events:none}
+.ht__dust{display:block;width:clamp(220px,24vw,360px);aspect-ratio:304/154;margin:0 auto 26px}
+.fx-dust .ht__title{font-size:clamp(54px,7vw,118px)}
+/* B: lakk + arany fény */
+.fx-lacquer{--lx:50%;--ly:38%;background:#0b0a09}
+.fx-lacquer::before,.fx-lacquer::after{content:"";position:absolute;inset:0;pointer-events:none}
+.fx-lacquer::before{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60' viewBox='0 0 120 60'%3E%3Cg fill='none' stroke='%23c4a46c' stroke-width='1'%3E%3Cpath d='M0 60a60 60 0 0 1 120 0M10 60a50 50 0 0 1 100 0M20 60a40 40 0 0 1 80 0M30 60a30 30 0 0 1 60 0M40 60a20 20 0 0 1 40 0'/%3E%3Cpath d='M-60 30a60 60 0 0 1 120 0M-50 30a50 50 0 0 1 100 0M-40 30a40 40 0 0 1 80 0M-30 30a30 30 0 0 1 60 0M-20 30a20 20 0 0 1 40 0M60 30a60 60 0 0 1 120 0M70 30a50 50 0 0 1 100 0M80 30a40 40 0 0 1 80 0M90 30a30 30 0 0 1 60 0M100 30a20 20 0 0 1 40 0'/%3E%3C/g%3E%3C/svg%3E") 0 0/120px 60px;
+  opacity:.26;-webkit-mask:radial-gradient(circle 34vmax at var(--lx) var(--ly),#000 0,rgba(0,0,0,.35) 35%,transparent 72%);mask:radial-gradient(circle 34vmax at var(--lx) var(--ly),#000 0,rgba(0,0,0,.35) 35%,transparent 72%)}
+.fx-lacquer::after{background:radial-gradient(circle 40vmax at var(--lx) var(--ly),rgba(196,164,108,.13),transparent 65%),radial-gradient(ellipse at 50% 120%,rgba(0,0,0,.6),transparent 60%)}
+.fx-lacquer .ht{z-index:2}

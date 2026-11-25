@@ -107,7 +107,7 @@
   // nincs számláló: a sötét függöny addig marad, amíg a nyitókép betölt
   // (legalább 0,4 s, legfeljebb 2 s), így a kezdőoldal sötét átmenete folytatódik
   const heroReady = new Promise(r => {
-    if (heroImg.complete && heroImg.naturalWidth) r();
+    if (!heroImg || (heroImg.complete && heroImg.naturalWidth)) r();
     else { heroImg.addEventListener('load', r, { once: true }); heroImg.addEventListener('error', r, { once: true }); }
   });
   const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
@@ -242,6 +242,7 @@
   const outline = $('.hero__outline');
 
   function renderHero() {
+    if (!frame) return;   // szöveges nyitás: nincs keret, nincs görgetett jelenet
     const total = hero.offsetHeight - H;
     const p = total > 0 ? clamp(-hero.getBoundingClientRect().top / total) : 0;
     if (p >= 1 && hero.dataset.idle) return;
