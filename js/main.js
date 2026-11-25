@@ -169,9 +169,11 @@
      ========================================================= */
   const splitEl = el => {
     const txt = el.textContent.trim();
-    el.setAttribute('aria-label', txt);
+    const head = /^H\d$/.test(el.tagName);   // aria-label csak címsoron érvényes, máshol rejtett szöveg
+    if (head) el.setAttribute('aria-label', txt);
     el.innerHTML = txt.split(/\s+/).map(w =>
-      `<span class="w" aria-hidden="true">${[...w].map(c => `<span class="ch">${c}</span>`).join('')}</span>`).join(' ');
+      `<span class="w" aria-hidden="true">${[...w].map(c => `<span class="ch">${c}</span>`).join('')}</span>`).join(' ')
+      + (head ? '' : `<span class="vh">${txt}</span>`);
     $$('.ch', el).forEach((c, i) => c.style.transitionDelay = `${i * 24}ms`);
   };
   $$('.split').forEach(splitEl);
