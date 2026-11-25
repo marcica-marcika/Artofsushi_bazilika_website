@@ -29,8 +29,12 @@ const CFG = {
   MAX_PER_HOUR: 20,        // összesen ennyi új foglalás óránként (védi a napi ~100 e-mailes Gmail-keretet)
   MAX_PER_GUEST_DAY: 3,    // ugyanarról az e-mail címről / telefonszámról naponta legfeljebb ennyi
   MIN_FILL_MS: 3000,       // ennél gyorsabban kitöltött űrlap = robot
-  SLOT_DAYS: [5, 6],       // péntek, szombat: este kétórás sávok
+  SLOT_DAYS: [5, 6],       // 2026-11-27-ig péntek, szombat: este kétórás sávok
   SLOTS: { '17:00': '17:00–19:00', '19:00': '19:00–21:00' },
+  WEEKEND_FROM: '2026-11-28',  // ettől péntek, szombat, vasárnap: 16–18, 18–20, 20–22, majd 22:00
+  WEEKEND_DAYS: [5, 6, 0],
+  WEEKEND_SLOTS: { '16:00': '16:00–18:00', '18:00': '18:00–20:00', '20:00': '20:00–22:00' },
+  VALENTINE_SLOTS: { '12:00': '12:00–14:00', '14:00': '14:00–16:00', '16:00': '16:00–18:00', '18:00': '18:00–20:00', '20:00': '20:00–22:00' },
   GMAIL_RESERVE: 15,       // csak Gmail esetén: a vendég automatikus „megkaptuk” levele csak akkor megy, ha ennél több marad (a visszaigazolásoknak)
   NOTIFY_RESERVE: 40,      // a bolt értesítője Gmailből csak akkor, ha ennél több marad
   BACKUP_KEEP_DAYS: 14     // a „Mentés 备份” biztonsági lapok ennyi nap után törlődnek (személyes adatok!)
@@ -191,10 +195,16 @@ function clean_(d) {
   return { name, email, phone, date, time, note, guests, lang, dateObj, id };
 }
 
-// péntek / szombat este a táblázatban csak a kezdés áll („19:00”), a vendég levelében a teljes sáv („19:00–21:00”)
+// hétvégén este a táblázatban csak a kezdés áll („18:00”), a vendég levelében a teljes sáv („18:00–20:00”)
 function slotLabel_(dateObj, time) {
   const t = String(time || '');
-  return dateObj instanceof Date && CFG.SLOT_DAYS.indexOf(dateObj.getDay()) >= 0 && CFG.SLOTS[t] ? CFG.SLOTS[t] : t;
+  if (!(dateObj instanceof Date)) return t;
+  const ymd = Utilities.formatDate(dateObj, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  let map = {};
+  if (ymd.slice(5) === '02-14') map = CFG.VALENTINE_SLOTS;
+  else if (ymd >= CFG.WEEKEND_FROM) { if (CFG.WEEKEND_DAYS.indexOf(dateObj.getDay()) >= 0) map = CFG.WEEKEND_SLOTS; }
+  else if (CFG.SLOT_DAYS.indexOf(dateObj.getDay()) >= 0) map = CFG.SLOTS;
+  return map[t] || t;
 }
 
 /* =========================================================

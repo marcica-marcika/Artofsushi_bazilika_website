@@ -591,27 +591,49 @@
   const far = new Date(today); far.setDate(far.getDate() + 180); // a szerver is legfeljebb 180 napot fogad el
   date.max = `${far.getFullYear()}-${pad(far.getMonth() + 1)}-${pad(far.getDate())}`;
   const formShown = Date.now(); // robotszűrés: 3 mp-en belül beküldött űrlapot a szerver eldob
-  // időpontok félóránként, nyitástól zárás előtt 2 óráig;
-  // péntek és szombat este 17 és 21 óra között kétórás sávok (17:00–19:00, 19:00–21:00), utána ismét félóránként (21:30, 22:00)
-  const SLOT_DAYS = [5, 6], SLOT_FROM = 17, SLOT_TO = 21, SLOTS = [['17:00', '19:00'], ['19:00', '21:00']];
-  const slotDay = () => {
-    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date.value);
-    return !!m && SLOT_DAYS.includes(new Date(+m[1], m[2] - 1, +m[3]).getDay());
+  // időpontok félóránként, nyitástól zárás előtt 2 óráig – kivéve:
+  //  • 2026-11-28-tól péntek, szombat, vasárnap: 16 óráig félóránként, utána kétórás sávok
+  //    (16:00–18:00, 18:00–20:00, 20:00–22:00), majd 22:00 
+  //  • 2026-11-27-ig péntek és szombat: 17:00–19:00, 19:00–21:00, utána félóránként (21:30, 22:00)
+  //  • 22:00 / 22:30 választásakor figyelmeztetés: a konyha 23:00-kor zár (minden nap, kivéve febr. 14.)
+  //  • minden év február 14.: csak 12:00, 14:00, 16:00, 18:00, 20:00, 22:00 (nincs 22:30, nincs figyelmeztetés)
+  const WEEKEND_FROM = '2026-11-28', WEEKEND_DAYS = [5, 6, 0], OLD_SLOT_DAYS = [5, 6];
+  const KITCHEN_LATE = ['22:00', '22:30'];  // 22:30 jelenleg nincs a listában
+  const hm = x => `${pad(Math.floor(x) % 24)}:${pad(x % 1 ? 30 : 0)}`;
+  const range = (a, b) => [hm(a), `${hm(a)} – ${hm(b)}`];
+  const halfHours = (from, to) => { const o = []; for (let x = from; x <= to; x += .5) o.push([hm(x), hm(x)]); return o; };
+  const timesFor = v => {
+    const first = Math.ceil(CONFIG.OPEN_HOUR * 2) / 2, last = CONFIG.CLOSE_HOUR - 2;
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || '');
+    if (!m) return { list: halfHours(first, last), kitchen: true };
+    if (m[2] === '02' && m[3] === '14')
+      return { list: [range(12, 14), range(14, 16), range(16, 18), range(18, 20), range(20, 22), [hm(22), hm(22)]] };
+    const dow = new Date(+m[1], m[2] - 1, +m[3]).getDay();
+    if (v >= WEEKEND_FROM && WEEKEND_DAYS.includes(dow))
+      return { list: [...halfHours(first, 15.5), range(16, 18), range(18, 20), range(20, 22), [hm(22), hm(22)]], kitchen: true };
+    if (v < WEEKEND_FROM && OLD_SLOT_DAYS.includes(dow))
+      return { list: [...halfHours(first, 16.5), range(17, 19), range(19, 21), ...halfHours(21.5, last)], kitchen: true };
+    return { list: halfHours(first, last), kitchen: true };
+  };
+  const timeNote = $('#f-time-note');
+  let kitchenDay = false;
+  const syncNote = () => {
+    if (!timeNote) return;
+    const on = kitchenDay && KITCHEN_LATE.includes(time.value);
+    timeNote.hidden = !on;
+    timeNote.textContent = on ? T('kitchen') : '';
   };
   const fillTimes = () => {
-    const prev = time.value, slots = slotDay();
+    const prev = time.value, t = timesFor(date.value);
+    kitchenDay = !!t.kitchen;
     time.length = 0;
-    for (let x = Math.ceil(CONFIG.OPEN_HOUR * 2) / 2; x <= CONFIG.CLOSE_HOUR - 2; x += .5) {
-      if (slots && x >= SLOT_FROM && x <= SLOT_TO) {
-        if (x === SLOT_FROM) SLOTS.forEach(([a, b]) => time.add(new Option(`${a} – ${b}`, a)));
-        continue;
-      }
-      const v = `${pad(Math.floor(x) % 24)}:${pad(x % 1 ? 30 : 0)}`;
-      time.add(new Option(v, v));
-    }
-    const vals = [...time.options].map(o => o.value);
-    time.value = vals.includes(prev) ? prev : vals.includes('19:00') ? '19:00' : vals[vals.length - 1];
+    t.list.forEach(([v, label]) => time.add(new Option(label, v)));
+    const vals = t.list.map(o => o[0]);
+    time.value = vals.includes(prev) ? prev : ['19:00', '18:00'].find(x => vals.includes(x)) || vals[vals.length - 1];
+    syncNote();
   };
+  time.addEventListener('change', syncNote);
+  document.addEventListener('aos:lang', syncNote);
   fillTimes();
   ['input', 'change'].forEach(e => date.addEventListener(e, fillTimes));
   const timeLabel = () => (time.selectedOptions[0] || {}).text || time.value;
@@ -654,7 +676,7 @@
     if (!ok) { msg.classList.add('err'); msg.textContent = T('formErr'); return; }
     const data = Object.fromEntries(new FormData(form));
     data.guests = guests;
-    const shownTime = timeLabel();   // pénteken / szombaton este a sáv: „19:00 – 21:00”
+    const shownTime = timeLabel();   // hétvégén este a sáv: „18:00 – 20:00”
     let bookedId = '';
     const summary = `Asztalfoglalás – Art of Sushi Bazilika
 Név: ${data.name}
@@ -694,7 +716,7 @@ Nyelv: ${T('langName')}`;
         ? T('sent', data.name, data.date, shownTime, guests, CONFIG.PHONE)
         : T('call', data.name, data.date, shownTime, guests, CONFIG.PHONE);
       rid = newRid();
-      form.reset(); guests = 2; guestsOut.textContent = 2; fillTimes(); time.value = '19:00'; syncDate();
+      form.reset(); guests = 2; guestsOut.textContent = 2; fillTimes(); syncDate();
       if (window.turnstile) try { turnstile.reset(); } catch {}
     } catch (err) {
       msg.classList.add('err');
