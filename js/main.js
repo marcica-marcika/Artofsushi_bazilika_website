@@ -209,11 +209,29 @@
     });
   }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
   $$('.reveal-up, .split, .facts li').forEach(el => io.observe(el));
-  // a képek már akkor nyíljanak, amikor a széle beér a képernyőre
+  // képek: jóval a képernyő előtt betöltjük őket, és csak akkor nyílnak, ha már ki vannak rajzolva,
+  // így a nyitás nem üres kereten fut le (nem „ugrik be” a kép a végén)
+  const ready = img => !img ? Promise.resolve() : Promise.race([
+    (img.complete && img.naturalWidth ? Promise.resolve() : new Promise(r => { img.addEventListener('load', r, { once: true }); img.addEventListener('error', r, { once: true }); }))
+      .then(() => img.decode ? img.decode().catch(() => {}) : 0),
+    new Promise(r => setTimeout(r, 2500))
+  ]);
+  const ioPre = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (!e.isIntersecting) return; const im = $('img', e.target); if (im) im.loading = 'eager'; ioPre.unobserve(e.target); });
+  }, { rootMargin: '0px 0px 150% 0px' });
   const ioClip = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); ioClip.unobserve(e.target); } });
-  }, { threshold: 0, rootMargin: '0px 0px 25% 0px' });
-  $$('.clip').forEach(el => ioClip.observe(el));
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      ioClip.unobserve(e.target);
+      const im = $('img', e.target);
+      if (im) im.loading = 'eager';
+      // a Pillanatok három képe együtt, balról jobbra nyílik (nem a betöltés sorrendjében)
+      const grp = e.target.classList.contains('band__img') ? $$('.band__img', e.target.parentElement) : [e.target];
+      grp.forEach(g => { const i = $('img', g); if (i) i.loading = 'eager'; });
+      Promise.all(grp.map(g => ready($('img', g)))).then(() => requestAnimationFrame(() => grp.forEach(g => { g.classList.add('in'); ioClip.unobserve(g); })));
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+  $$('.clip').forEach(el => { ioPre.observe(el); ioClip.observe(el); });
 
   function countUp(el) {
     if (el.dataset.done) return;

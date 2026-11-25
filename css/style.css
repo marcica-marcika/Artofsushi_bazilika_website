@@ -159,8 +159,12 @@ section{position:relative;padding:clamp(110px,14vw,220px) var(--pad)}
 .reveal-up.in{opacity:1;transform:none}
 html:not(.js) .reveal-up{opacity:1;transform:none}
 .clip{overflow:hidden;margin:0;position:relative}
-.clip img{width:100%;height:100%;object-fit:cover;clip-path:inset(100% 0 0 0);transform:scale(1.22);transition:clip-path 1s cubic-bezier(.3,0,.15,1),transform 1.6s var(--ease)}
-.clip.in img{clip-path:inset(0 0 0 0);transform:scale(1.08)}
+.clip img{width:100%;height:100%;object-fit:cover;clip-path:inset(100% 0 0 0);transform:scale(1.24) translateY(4%);opacity:.001;
+  transition:clip-path 1.5s cubic-bezier(.16,1,.3,1),transform 2.4s cubic-bezier(.16,1,.3,1),opacity .5s linear}
+.clip.in img{clip-path:inset(0 0 0 0);transform:scale(1.08) translateY(0);opacity:1}
+.band__img:nth-child(2) img{transition-delay:.12s}
+.band__img:nth-child(3) img{transition-delay:.24s}
+.about__img--b img{transition-delay:.15s}
 html:not(.js) .clip img{clip-path:none;transform:none}
 [data-speed]{will-change:transform}
 
