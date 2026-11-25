@@ -624,3 +624,8 @@ html:not(.js) .clip img{clip-path:none;transform:none}
 }
 
 .vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- végigkísérő arany por ---------- */
+.thread{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:60}
+.dust-slot{width:clamp(120px,11vw,160px);aspect-ratio:304/154;margin:0 0 26px}
+html.reduce .dust-slot{display:none}
