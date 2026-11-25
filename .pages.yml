@@ -84,7 +84,7 @@ content:
           - { name: image, label: 照片, type: image, required: true }
 
   - name: gallery
-    label: 画廊照片
+    label: 照片展示（Pillanatok，3 张）
     type: file
     path: content/gallery.json
     format: json
@@ -92,7 +92,7 @@ content:
       - name: images
         label: 照片
         type: object
-        list: { min: 3, max: 24, collapsible: { collapsed: true, summary: "{index}" } }
+        list: { min: 3, max: 3, collapsible: { collapsed: true, summary: "{index}" } }
         fields:
           - { name: image, label: 照片, type: image, required: true }
 

@@ -107,7 +107,7 @@
   // nincs számláló: a sötét függöny addig marad, amíg a nyitókép betölt
   // (legalább 0,4 s, legfeljebb 2 s), így a kezdőoldal sötét átmenete folytatódik
   const heroReady = new Promise(r => {
-    if (heroImg.complete && heroImg.naturalWidth) r();
+    if (!heroImg || (heroImg.complete && heroImg.naturalWidth)) r();
     else { heroImg.addEventListener('load', r, { once: true }); heroImg.addEventListener('error', r, { once: true }); }
   });
   const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
@@ -169,9 +169,11 @@
      ========================================================= */
   const splitEl = el => {
     const txt = el.textContent.trim();
-    el.setAttribute('aria-label', txt);
+    const head = /^H\d$/.test(el.tagName);   // aria-label csak címsoron érvényes, máshol rejtett szöveg
+    if (head) el.setAttribute('aria-label', txt);
     el.innerHTML = txt.split(/\s+/).map(w =>
-      `<span class="w" aria-hidden="true">${[...w].map(c => `<span class="ch">${c}</span>`).join('')}</span>`).join(' ');
+      `<span class="w" aria-hidden="true">${[...w].map(c => `<span class="ch">${c}</span>`).join('')}</span>`).join(' ')
+      + (head ? '' : `<span class="vh">${txt}</span>`);
     $$('.ch', el).forEach((c, i) => c.style.transitionDelay = `${i * 24}ms`);
   };
   $$('.split').forEach(splitEl);
@@ -207,11 +209,29 @@
     });
   }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
   $$('.reveal-up, .split, .facts li').forEach(el => io.observe(el));
-  // a képek már akkor nyíljanak, amikor a széle beér a képernyőre
+  // képek: jóval a képernyő előtt betöltjük őket, és csak akkor nyílnak, ha már ki vannak rajzolva,
+  // így a nyitás nem üres kereten fut le (nem „ugrik be” a kép a végén)
+  const ready = img => !img ? Promise.resolve() : Promise.race([
+    (img.complete && img.naturalWidth ? Promise.resolve() : new Promise(r => { img.addEventListener('load', r, { once: true }); img.addEventListener('error', r, { once: true }); }))
+      .then(() => img.decode ? img.decode().catch(() => {}) : 0),
+    new Promise(r => setTimeout(r, 2500))
+  ]);
+  const ioPre = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (!e.isIntersecting) return; const im = $('img', e.target); if (im) im.loading = 'eager'; ioPre.unobserve(e.target); });
+  }, { rootMargin: '0px 0px 150% 0px' });
   const ioClip = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); ioClip.unobserve(e.target); } });
-  }, { threshold: 0, rootMargin: '0px 0px 25% 0px' });
-  $$('.clip').forEach(el => ioClip.observe(el));
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      ioClip.unobserve(e.target);
+      const im = $('img', e.target);
+      if (im) im.loading = 'eager';
+      // a Pillanatok három képe együtt, balról jobbra nyílik (nem a betöltés sorrendjében)
+      const grp = e.target.classList.contains('band__img') ? $$('.band__img', e.target.parentElement) : [e.target];
+      grp.forEach(g => { const i = $('img', g); if (i) i.loading = 'eager'; });
+      Promise.all(grp.map(g => ready($('img', g)))).then(() => requestAnimationFrame(() => grp.forEach(g => { g.classList.add('in'); ioClip.unobserve(g); })));
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+  $$('.clip').forEach(el => { ioPre.observe(el); ioClip.observe(el); });
 
   function countUp(el) {
     if (el.dataset.done) return;
@@ -242,6 +262,7 @@
   const outline = $('.hero__outline');
 
   function renderHero() {
+    if (!frame) return;   // szöveges nyitás: nincs keret, nincs görgetett jelenet
     const total = hero.offsetHeight - H;
     const p = total > 0 ? clamp(-hero.getBoundingClientRect().top / total) : 0;
     if (p >= 1 && hero.dataset.idle) return;
@@ -307,18 +328,18 @@
   // vízszintes galéria
   const hgal = $('.hgal');
   const track = $('.hgal__track');
-  const gItems = $$('.g', track);
+  const gItems = track ? $$('.g', track) : [];
   const gImgs = gItems.map(g => $('img', g));
   const gBar = $('.hgal__progress span');
   const gCount = $('.hgal__count b');
   let gDist = 0;
   function sizeGallery() {
-    if (reduce) return;
+    if (reduce || !hgal) return;
     gDist = Math.max(0, track.scrollWidth - W);
     hgal.style.height = `${gDist + H}px`;
   }
   function renderGallery() {
-    if (reduce) return;
+    if (reduce || !hgal) return;
     const r = hgal.getBoundingClientRect();
     if (r.bottom < 0 || r.top > H) return;
     const p = clamp(-r.top / (hgal.offsetHeight - H || 1));

@@ -14,7 +14,9 @@
   <meta property="og:locale" content="hu_HU">
   <meta property="og:locale:alternate" content="en_GB">
   <meta name="twitter:card" content="summary_large_image">
-  <meta property="og:image" content="https://artofsushibp.hu/images/ART02955.jpg">
+  <meta property="og:image" content="https://artofsushibp.hu/images/og-bazilika.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   <meta name="theme-color" content="#0c0b0a">
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
 
@@ -33,7 +35,7 @@
     "alternateName": "Art of Sushi Budapest – Bazilika",
     "description": "All you can eat prémium sushi étterem a Szent István-bazilika mellett, Budapest V. kerületében.",
     "url": "https://artofsushibp.hu/bazilika",
-    "image": ["https://artofsushibp.hu/images/facade-bazilika.jpg","https://artofsushibp.hu/images/ART02955.jpg"],
+    "image": ["https://artofsushibp.hu/images/facade-bazilika.jpg","https://artofsushibp.hu/images/gallery/g07.jpg"],
     "logo": "https://artofsushibp.hu/images/logo.svg",
     "servesCuisine": ["Japanese", "Sushi"],
     "priceRange": "$$",
@@ -88,14 +90,14 @@
     <div class="overlay__bg"></div>
     <div class="overlay__inner">
       <nav class="overlay__links" aria-label="Fő navigáció">
-        <a href="#rolunk" data-img="images/1-3.jpg"><small>01</small><span>Rólunk</span></a>
-        <a href="#etlap" data-img="images/ART02966.jpg"><small>02</small><span>Étlap</span></a>
-        <a href="#sef" data-img="images/dragon-roll.jpg"><small>03</small><span>Séf ajánlata</span></a>
-        <a href="#galeria" data-img="images/2-3.jpg"><small>04</small><span>Galéria</span></a>
-        <a href="#arak" data-img="images/ART02977.jpg"><small>05</small><span>Árak</span></a>
-        <a href="#foglalas" data-img="images/2-5.jpg"><small>06</small><span>Foglalás</span></a>
+        <a href="#rolunk" data-img="images/gallery/g07.jpg"><small>01</small><span>Rólunk</span></a>
+        <a href="#etlap" data-img="images/menu/d05.jpg"><small>02</small><span>Étlap</span></a>
+        <a href="#sef" data-img="images/chef-dragon.jpg"><small>03</small><span>Séf ajánlata</span></a>
+        <a href="#galeria" data-img="images/gallery/g04.jpg"><small>04</small><span>Pillanatok</span></a>
+        <a href="#arak" data-img="images/gallery/g05.jpg"><small>05</small><span>Árak</span></a>
+        <a href="#foglalas" data-img="images/gallery/g08.jpg"><small>06</small><span>Foglalás</span></a>
       </nav>
-      <figure class="overlay__preview"><img src="images/1-3.jpg" alt=""></figure>
+      <figure class="overlay__preview"><img src="images/gallery/g07.jpg" alt="" loading="lazy"></figure>
       <div class="overlay__foot">
         <p>Sas u. 4<br>1051 Budapest</p>
         <p><a href="tel:+36305161606" data-cms-attr="href=info.phone|tel" data-cms="info.phone">+36 30 516 1606</a><br><span data-cms="calc.overlay">Hétfő – Vasárnap 12:00 – 00:00</span></p>
@@ -110,32 +112,22 @@
 
   <main class="main" id="top">
 
-    <!-- ============ HERO (rögzített jelenet) ============ -->
-    <section class="hero" aria-label="Art of Sushi Bazilika">
-      <div class="hero__pin">
-        <div class="hero__frame">
-          <picture><source media="(max-aspect-ratio: 4/5)" srcset="images/hero-painting-m.jpg" width="1200" height="2000"><img src="images/hero-painting.jpg" alt="Art Of Sushi – festett logó" width="2400" height="1600"></picture>
-        </div>
-        <div class="hero__outline" aria-hidden="true"></div>
-        <div class="hero__veil" aria-hidden="true"></div>
-
-        <h1 class="hero__title">
-          <span class="hero__word hero__word--l"><span class="mask"><span>Art of</span></span></span>
-          <span class="hero__word hero__word--r"><span class="mask"><span><em>Sushi</em></span></span></span>
-        </h1>
-
-        <div class="hero__meta hero__meta--l"><span class="mask"><span>Bazilika · Sas utca 4</span></span></div>
-        <div class="hero__meta hero__meta--r"><span class="mask"><span>All you can eat · Budapest</span></span></div>
-
-        <div class="hero__after">
-          <p class="kicker center">Új üzlet a Szent István-bazilika mellett</p>
-          <p class="hero__sub">Korlátlan prémium sushi,<br><em>a Bazilika árnyékában.</em></p>
-          <a class="btn btn--solid" href="#foglalas" data-cursor="Foglalás">Asztalfoglalás</a>
-        </div>
-
-        <div class="hero__hint" aria-hidden="true"><span>Görgessen</span><i></i></div>
-        <span class="hero__vertical jp" aria-hidden="true">鮨の芸術</span>
+    <!-- ============ HERO (arany por: a részecskék a hal-logóvá állnak össze) ============ -->
+    <section class="hero hero--text fx-dust" aria-label="Art of Sushi Bazilika">
+      <div class="ht ht--full">
+        <div class="ht__dust ht__fade" data-d="M 338.726562 206.339844 C 340.070312 203.355469 341.234375 200.652344 342.347656 198.0625 C 343.597656 195.5 344.71875 193.035156 345.769531 190.496094 C 346.984375 188 348.09375 185.425781 349.222656 182.621094 C 349.859375 181.242188 350.492188 179.800781 351.128906 178.28125 C 351.773438 176.765625 352.359375 175.144531 353.152344 173.5 C 353.558594 172.597656 354.0625 171.472656 354.65625 170.152344 C 355.246094 168.828125 355.898438 167.300781 356.78125 165.683594 C 357.625 164.050781 358.550781 162.257812 359.539062 160.335938 L 359.632812 160.15625 C 359.695312 160.023438 359.851562 159.769531 359.960938 159.582031 L 360.6875 158.355469 C 361.167969 157.53125 361.65625 156.703125 362.148438 155.867188 C 363.128906 154.199219 364.097656 152.484375 365.242188 150.851562 C 366.34375 149.1875 367.464844 147.503906 368.597656 145.796875 C 369.820312 144.15625 371.058594 142.492188 372.308594 140.808594 C 382.4375 127.433594 395.820312 114.582031 411.476562 104.066406 C 427.105469 93.550781 445.085938 85.460938 463.503906 81.546875 C 472.699219 79.601562 481.976562 78.601562 490.964844 78.914062 C 492.085938 78.957031 493.207031 79 494.320312 79.042969 C 495.433594 79.09375 496.535156 79.238281 497.640625 79.328125 C 498.738281 79.449219 499.84375 79.5 500.925781 79.671875 C 502.011719 79.835938 503.089844 80 504.167969 80.160156 C 508.457031 80.808594 512.5625 81.84375 516.53125 83.125 C 532.382812 88.320312 545.203125 97.824219 552.824219 107.941406 C 556.675781 112.992188 559.238281 118.164062 560.789062 122.894531 C 561.546875 125.269531 562.035156 127.535156 562.386719 129.636719 C 562.660156 131.746094 562.839844 133.699219 562.828125 135.460938 C 562.84375 138.988281 562.472656 141.738281 562.121094 143.589844 C 561.976562 144.523438 561.765625 145.21875 561.675781 145.695312 C 561.570312 146.171875 561.511719 146.417969 561.511719 146.417969 C 561.511719 146.417969 561.457031 146.660156 561.320312 147.128906 C 561.179688 147.597656 561 148.300781 560.714844 149.207031 C 560.125 151.011719 559.175781 153.65625 557.539062 156.882812 C 555.890625 160.097656 553.59375 163.925781 550.296875 167.90625 C 548.679688 169.917969 546.800781 171.953125 544.703125 173.996094 C 542.605469 176.042969 540.273438 178.085938 537.691406 180.050781 C 532.539062 183.996094 526.441406 187.726562 519.511719 190.738281 C 516.03125 192.234375 512.429688 193.582031 508.507812 194.621094 C 507.542969 194.898438 506.566406 195.179688 505.585938 195.460938 C 504.589844 195.691406 503.585938 195.925781 502.582031 196.15625 C 501.570312 196.378906 500.566406 196.652344 499.535156 196.84375 C 498.503906 197.027344 497.46875 197.210938 496.425781 197.398438 C 488.078125 198.855469 479.199219 199.5 470.0625 199.320312 C 460.925781 199.121094 451.542969 198.148438 442.125 196.554688 C 432.703125 194.972656 423.253906 192.757812 413.921875 190.0625 C 404.558594 187.441406 395.339844 184.328125 386.332031 181.019531 C 377.324219 177.714844 368.546875 174.144531 360.097656 170.441406 C 357.976562 169.53125 355.882812 168.609375 353.816406 167.660156 C 351.746094 166.71875 349.683594 165.808594 347.65625 164.859375 C 345.632812 163.910156 343.625 162.972656 341.636719 162.042969 C 339.785156 161.152344 337.953125 160.273438 336.140625 159.402344 C 327.210938 155.105469 319.957031 151.402344 316.320312 149.582031 C 302.910156 142.789062 294.574219 140.277344 281.964844 137.167969 C 291.640625 145.820312 298.414062 151.34375 311.851562 158.324219 C 315.5 160.195312 322.804688 163.945312 331.835938 168.304688 C 333.671875 169.183594 335.527344 170.074219 337.402344 170.976562 C 339.417969 171.921875 341.453125 172.875 343.507812 173.835938 C 345.5625 174.796875 347.660156 175.722656 349.757812 176.679688 C 351.859375 177.640625 353.988281 178.582031 356.144531 179.507812 C 364.738281 183.273438 373.699219 186.917969 382.914062 190.300781 C 392.128906 193.679688 401.585938 196.875 411.214844 199.570312 C 420.828125 202.34375 430.640625 204.640625 440.472656 206.296875 C 450.308594 207.957031 460.175781 208.984375 469.871094 209.1875 C 479.566406 209.375 489.085938 208.691406 498.117188 207.113281 C 499.246094 206.910156 500.367188 206.707031 501.484375 206.507812 C 502.597656 206.296875 503.695312 206.007812 504.789062 205.761719 C 505.886719 205.507812 506.972656 205.253906 508.054688 205.003906 C 509.125 204.695312 510.1875 204.390625 511.246094 204.089844 C 515.476562 202.964844 519.597656 201.429688 523.4375 199.769531 C 531.144531 196.414062 537.917969 192.273438 543.683594 187.855469 C 546.570312 185.652344 549.191406 183.355469 551.5625 181.042969 C 553.929688 178.738281 556.058594 176.425781 557.914062 174.125 C 561.671875 169.566406 564.363281 165.117188 566.300781 161.328125 C 568.226562 157.527344 569.367188 154.355469 570.074219 152.183594 C 570.417969 151.089844 570.632812 150.238281 570.800781 149.675781 C 570.964844 149.109375 571.035156 148.8125 571.035156 148.8125 C 571.035156 148.8125 571.101562 148.515625 571.234375 147.9375 C 571.347656 147.355469 571.59375 146.511719 571.773438 145.371094 C 572.203125 143.113281 572.671875 139.734375 572.652344 135.375 C 572.664062 133.199219 572.453125 130.789062 572.101562 128.171875 C 571.679688 125.570312 571.070312 122.777344 570.144531 119.875 C 568.261719 114.09375 565.15625 107.890625 560.65625 101.984375 C 551.710938 90.148438 537.316406 79.585938 519.59375 73.753906 C 501.746094 67.992188 481.222656 67.589844 461.441406 71.886719 C 441.621094 76.101562 422.535156 84.714844 405.972656 95.847656 C 389.386719 106.988281 375.210938 120.605469 364.449219 134.8125 C 363.121094 136.601562 361.789062 138.355469 360.511719 140.117188 C 359.304688 141.929688 358.113281 143.722656 356.941406 145.488281 C 355.726562 147.230469 354.695312 149.050781 353.648438 150.832031 C 353.125 151.71875 352.609375 152.601562 352.09375 153.476562 C 351.835938 153.914062 351.582031 154.351562 351.324219 154.785156 C 351.210938 154.984375 351.042969 155.257812 350.976562 155.398438 L 350.878906 155.59375 C 349.824219 157.640625 348.84375 159.554688 347.945312 161.296875 C 347.015625 163.027344 346.320312 164.660156 345.699219 166.074219 C 345.074219 167.488281 344.542969 168.695312 344.117188 169.660156 C 343.292969 171.425781 342.726562 173.183594 342.15625 174.847656 C 341.589844 176.511719 341.082031 178.109375 340.617188 179.648438 C 339.839844 182.785156 339.285156 185.71875 338.828125 188.566406 C 338.535156 191.464844 338.371094 194.292969 338.28125 197.1875 C 338.328125 200.113281 338.519531 203.125 338.726562 206.339844 |M 0.00126983 0.00166563 C -0.280181 -6.037791 -10.017583 -8.508301 -13.234718 -3.387467 C -16.451853 1.729458 -10.248216 9.402892 -4.533209 7.436648 C 1.185707 5.470404 1.510157 -4.212273 -4.013308 -6.663237 " aria-hidden="true"></div>
+        <p class="ht__eyebrow ht__fade">Budapest · Szent István-bazilika</p>
+        <h1 class="ht__title"><span class="mask"><span>Art of Sushi</span></span><span class="mask"><span><em>Bazilika</em></span></span></h1>
+        <p class="ht__sub ht__fade">Korlátlan prémium sushi,<br><em>a Bazilika árnyékában.</em></p>
+        <ul class="ht__facts ht__fade">
+          <li><small>Büfé</small><span>Korlátlan</span></li>
+          <li><small>Időtartam</small><span data-cms="calc.dur">2 óra</span></li>
+          <li><small>Nyitva</small><span data-cms="calc.times">12:00 – 00:00</span></li>
+          <li><small>Cím</small><span>Sas u. 4</span></li>
+        </ul>
+        <div class="ht__cta ht__fade"><a class="btn btn--solid" href="#foglalas" data-cursor="Foglalás">Asztalfoglalás</a><a class="btn btn--ghost" href="#etlap">Étlap</a></div>
       </div>
+      <span class="hero__vertical jp" aria-hidden="true">鮨の芸術</span>
     </section>
 
     <!-- ============ RÓLUNK ============ -->
@@ -144,16 +136,16 @@
       <p class="statement" data-fill data-cms="texts.statement">Gondosan válogatott, prémium friss alapanyagok – autentikus japán kézművességgel, <em>a sushi lakomák csúcsán.</em></p>
 
       <div class="about__grid">
-        <figure class="about__img about__img--a clip" data-speed="-0.08"><img src="images/1-3.jpg" alt="Az Art of Sushi Bazilika belső tere"></figure>
+        <figure class="about__img about__img--a clip" data-speed="-0.08"><img src="images/gallery/g07.jpg" alt="Nigiri a pulton" loading="lazy" decoding="async"></figure>
 
         <div class="about__copy">
-          <h2 class="h2 split" data-cms="texts.about_title">A sushi művészete</h2>
+          <h2 class="h2 split" data-dust="line" data-cms="texts.about_title">A sushi művészete</h2>
           <p class="reveal-up" data-cms="texts.about_1">Üdvözöljük az Art of Sushi-ban – fedezze fel a sushi lakomák csúcsát! Alapanyagainkat autentikus japán konyhaművészettel dolgozzuk fel, hogy a legkiválóbb ízeket nyújtsuk Önnek.</p>
           <p class="reveal-up" data-cms="texts.about_2">Legyen szó klasszikus sushiról, sashimiról vagy kreatív japán fogásokról, széles választékunk garantáltan minden ízlést kielégít.</p>
           <span class="signature reveal-up jp">芸術</span>
         </div>
 
-        <figure class="about__img about__img--b clip" data-speed="0.1"><img src="images/1-4.jpg" alt="Frissen készített sushi"></figure>
+        <figure class="about__img about__img--b clip" data-speed="0.1"><img src="images/gallery/g06.jpg" alt="Tempura garnélarák" loading="lazy" decoding="async"></figure>
       </div>
 
       <ul class="facts">
@@ -167,14 +159,14 @@
     <section class="menu" id="etlap">
       <div class="head head--center">
         <p class="kicker center reveal-up">II <i></i> Étlap</p>
-        <h2 class="h2 split">Étlapunk</h2>
+        <h2 class="h2 split" data-dust="line">Étlapunk</h2>
         <p class="head__lead reveal-up" data-cms="texts.menu_lead">Fedezze fel friss, kiváló minőségű alapanyagokból gondosan elkészített sushi- és ázsiai ételeinket.</p>
       </div>
 
       <div class="carousel reveal-up" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Étlap kategóriák" data-cursor="Húzza">
         <div class="carousel__stage" data-cms-list="menu.categories">
           <article class="dish">
-            <div class="dish__img"><img src="images/ART02977.jpg" data-cms-attr="src=.image|img; alt=.name" alt="Előételek" loading="lazy"></div>
+            <div class="dish__img"><img src="images/menu/d01.jpg" data-cms-attr="src=.image|img; alt=.name" alt="Előételek" loading="lazy"></div>
             <div class="dish__meta"><span class="dish__no" data-cms="#">01</span><h3 data-cms=".name">Előételek</h3><span class="jp" data-cms=".jp">前菜</span></div>
             <p data-cms=".text">Könnyű, ízgazdag kezdés a lakoma előtt.</p>
           </article>
@@ -195,13 +187,13 @@
     <section class="chef" id="sef">
       <div class="head head--center">
         <p class="kicker center reveal-up">III <i></i> Séf ajánlata</p>
-        <h2 class="h2 split">A séf kedvencei</h2>
+        <h2 class="h2 split" data-dust="line">A séf kedvencei</h2>
         <p class="head__lead reveal-up" data-cms="texts.chef_lead">Éttermünk legkedveltebb fogásai, amelyeket séfünk gondosan válogatott és tökéletesre alkotott – friss, ízletes és mindig a legjobb minőségben tálalva.</p>
       </div>
 
       <div class="chef__list" data-cms-list="menu.chef">
       <article class="feature" data-cms-attr="class=#|feat">
-        <figure class="feature__img clip" data-cursor="Kóstolja" data-speed="-0.06"><img src="images/eel-rice.jpg" data-cms-attr="src=.image|img; alt=.name" alt="Angolna rizs" decoding="async"></figure>
+        <figure class="feature__img clip" data-cursor="Kóstolja" data-speed="-0.06"><img src="images/chef-eel.jpg" data-cms-attr="src=.image|img; alt=.name" alt="Angolna rizs" loading="lazy" decoding="async"></figure>
         <div class="feature__text" data-speed="0.12">
           <span class="feature__big" aria-hidden="true" data-cms="#">01</span>
           <span class="feature__no reveal-up">Signature · No. <span data-cms="#">01</span></span>
@@ -221,24 +213,14 @@
       </div>
     </div>
 
-    <!-- ============ GALÉRIA (vízszintes, rögzített) ============ -->
-    <section class="hgal" id="galeria">
-      <div class="hgal__pin">
-        <div class="hgal__head">
-          <p class="kicker">IV <i></i> Galéria</p>
-          <h2 class="h2">Pillanatok</h2>
-          <span class="hgal__count"><b>01</b> / <span data-cms="calc.gcount">10</span></span>
-        </div>
-        <div class="hgal__track">
-          <div class="hgal__items" data-cms-list="gallery.images">
-          <button class="g g--1" data-cms-attr="class=#|gcls" data-cursor="Nagyít"><img src="images/gallery/g01.jpg" data-cms-attr="src=.image|img; alt=#|galt" alt="Galéria kép 1" loading="lazy"></button>
-        </div>
-          <div class="hgal__end">
-            <p class="kicker">Várjuk szeretettel</p>
-            <a class="hgal__cta" href="#foglalas" data-cursor="Foglalás">Foglaljon<br><em>asztalt</em> →</a>
-          </div>
-        </div>
-        <div class="hgal__progress" aria-hidden="true"><span></span></div>
+    <!-- ============ PILLANATOK (három kép, a háttérben szerkeszthető) ============ -->
+    <section class="band" id="galeria" aria-label="Pillanatok">
+      <div class="band__head">
+        <p class="kicker center reveal-up">IV <i></i> Pillanatok</p>
+        <p class="band__quote split" data-dust="line">Minden falat egy kis műalkotás.</p>
+      </div>
+      <div class="band__grid" data-cms-list="gallery.images">
+        <figure class="band__img clip"><img src="images/gallery/g04.jpg" data-cms-attr="src=.image|img" alt="" loading="lazy"></figure>
       </div>
     </section>
 
@@ -246,7 +228,7 @@
     <section class="pricing" id="arak">
       <div class="head head--center">
         <p class="kicker center reveal-up">V <i></i> Árak</p>
-        <h2 class="h2 split">All You Can Eat</h2>
+        <h2 class="h2 split" data-dust="line">All You Can Eat</h2>
       </div>
 
       <div class="price-card reveal-up">
@@ -262,17 +244,18 @@
       </div>
 
       <ol class="rules">
-        <li class="reveal-up"><span class="rules__n">i</span><h4>Étkezési időszak</h4><p data-cms="calc.duration_rule">Az önkiszolgáló étkezés időtartama legfeljebb 2 óra.</p></li>
-        <li class="reveal-up"><span class="rules__n">ii</span><h4>Italok és desszertek</h4><p data-cms="prices.drinks">Nem tartoznak a svédasztalos árba, külön rendelhetők és külön fizetendők.</p></li>
-        <li class="reveal-up"><span class="rules__n">iii</span><h4>Szervizdíj</h4><p data-cms="calc.service_rule">15% szervizdíjat számolunk fel.</p></li>
+        <li class="reveal-up"><span class="rules__n">i</span><h3>Étkezési időszak</h3><p data-cms="calc.duration_rule">Az önkiszolgáló étkezés időtartama legfeljebb 2 óra.</p></li>
+        <li class="reveal-up"><span class="rules__n">ii</span><h3>Italok és desszertek</h3><p data-cms="prices.drinks">Nem tartoznak a svédasztalos árba, külön rendelhetők és külön fizetendők.</p></li>
+        <li class="reveal-up"><span class="rules__n">iii</span><h3>Szervizdíj</h3><p data-cms="calc.service_rule">15% szervizdíjat számolunk fel.</p></li>
       </ol>
     </section>
 
     <!-- ============ FOGLALÁS ============ -->
     <section class="booking" id="foglalas">
-      <div class="booking__bg" data-speed="0.15"><img src="images/2-3.jpg" alt="" loading="lazy"></div>
+      <div class="booking__bg" data-speed="0.15"><img src="images/gallery/g08.jpg" alt="" loading="lazy"></div>
       <div class="booking__inner">
         <div class="booking__side">
+          <div class="dust-slot" data-dust="fish" aria-hidden="true"></div>
           <p class="kicker reveal-up">VI <i></i> Foglalás</p>
           <h2 class="h2 split">Foglaljon asztalt</h2>
           <p class="reveal-up" data-cms="texts.booking_lead">Gyors és ingyenes online foglalás néhány kattintással. Visszaigazolásunkat hamarosan megkapja.</p>
@@ -340,7 +323,7 @@
     <section class="contact" id="kapcsolat">
       <div class="contact__info">
         <p class="kicker reveal-up">VII <i></i> Kapcsolat</p>
-        <h2 class="h2 split">Itt talál minket</h2>
+        <h2 class="h2 split" data-dust="line">Itt talál minket</h2>
 
         <dl class="contact__list">
           <div class="reveal-up"><dt>Cím</dt><dd>Sas u. 4<br>1051 Budapest</dd></div>
@@ -416,6 +399,8 @@
 
   <script src="js/content-i18n.js?v=18daadabd7"></script>
   <script src="js/i18n.js?v=c0d86544c5"></script>
+  <script src="js/dust.js?v=1"></script>
+  <script src="js/thread.js?v=1"></script>
   <script src="js/main.js?v=1450452940"></script>
 </body>
 </html>
