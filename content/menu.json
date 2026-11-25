@@ -10,7 +10,7 @@
         "hu": "Könnyű, ízgazdag kezdés a lakoma előtt.",
         "en": "A light, flavourful start to the feast."
       },
-      "image": "images/ART02977.jpg"
+      "image": "images/menu/d01.jpg"
     },
     {
       "name": {
@@ -22,7 +22,7 @@
         "hu": "Vékonyra szelt carpaccio és finomra vágott tatár lazacból, tonhalból és tengeri sügérből.",
         "en": "Thinly sliced carpaccio and finely chopped tartare of salmon, tuna and sea bass."
       },
-      "image": "images/menu/c02.jpg"
+      "image": "images/menu/d02.jpg"
     },
     {
       "name": {
@@ -34,7 +34,7 @@
         "hu": "Vékonyra szelt, nyers prémium hal – a tiszta íz, rizs nélkül.",
         "en": "Thinly sliced premium raw fish – pure flavour, no rice."
       },
-      "image": "images/chatgpt-image-20251227-135154.png"
+      "image": "images/menu/d03.jpg"
     },
     {
       "name": {
@@ -46,7 +46,7 @@
         "hu": "Lazac és tonhal, kívül egy pillanatra megpirítva, belül nyersen.",
         "en": "Salmon and tuna, seared for a moment outside, raw within."
       },
-      "image": "images/menu/c04.jpg"
+      "image": "images/menu/d04.jpg"
     },
     {
       "name": {
@@ -58,7 +58,7 @@
         "hu": "Rizs, a tetején angolnával, főtt rákkal, lazaccal, tonhallal, tengeri sügérrel, kérgezett lazaccal, kérgezett tonhallal és flambírozott szósszal.",
         "en": "Rice topped with eel, cooked shrimp, salmon, tuna, sea bass, seared salmon, seared tuna, and flambéed sauce."
       },
-      "image": "images/ART02966.jpg"
+      "image": "images/menu/d05.jpg"
     },
     {
       "name": {
@@ -70,7 +70,7 @@
         "hu": "Halikrás gunkan, onigiri és kézzel tekert temaki.",
         "en": "Gunkan crowned with roe, onigiri and hand-rolled temaki."
       },
-      "image": "images/menu/c06.jpg"
+      "image": "images/menu/d06.jpg"
     },
     {
       "name": {
@@ -82,7 +82,7 @@
         "hu": "Tempurában ropogósra sütött tekercsek, melegen tálalva.",
         "en": "Rolls fried crisp in tempura, served warm."
       },
-      "image": "images/menu/c07.jpg"
+      "image": "images/menu/d07.jpg"
     },
     {
       "name": {
@@ -94,7 +94,7 @@
         "hu": "Kívül rizs, belül nori: a klasszikus fordított tekercs.",
         "en": "Rice outside, nori inside: the classic inside-out roll."
       },
-      "image": "images/menu/c08.jpg"
+      "image": "images/menu/d08.jpg"
     },
     {
       "name": {
@@ -106,7 +106,7 @@
         "hu": "Séfünk saját tekercsei, gazdag feltétekkel és szószokkal.",
         "en": "Our chef's own rolls, with generous toppings and sauces."
       },
-      "image": "images/menu/c09.jpg"
+      "image": "images/menu/d09.jpg"
     },
     {
       "name": {
@@ -118,7 +118,7 @@
         "hu": "Fekete rizsből készült tekercsek, látványos színnel.",
         "en": "Rolls made with black rice, striking in colour."
       },
-      "image": "images/menu/c10.jpg"
+      "image": "images/menu/d10.jpg"
     },
     {
       "name": {
@@ -130,7 +130,7 @@
         "hu": "Vékony, egyszerű tekercsek egyetlen töltelékkel.",
         "en": "Slim, simple rolls with a single filling."
       },
-      "image": "images/menu/c11.jpg"
+      "image": "images/menu/d11.jpg"
     },
     {
       "name": {
@@ -142,7 +142,7 @@
         "hu": "Rizstál friss hallal, zöldségekkel és öntettel.",
         "en": "Rice bowls with fresh fish, vegetables and dressing."
       },
-      "image": "images/menu/c12.jpg"
+      "image": "images/menu/d12.jpg"
     },
     {
       "name": {
@@ -154,7 +154,7 @@
         "hu": "Misoleves és gulyásleves – meleg kezdés.",
         "en": "Miso soup and goulash – a warm start."
       },
-      "image": "images/menu/c13.jpg"
+      "image": "images/menu/d13.jpg"
     },
     {
       "name": {
@@ -166,7 +166,7 @@
         "hu": "Edamame, gyoza és siu mai, gőzben párolva.",
         "en": "Edamame, gyoza and siu mai, gently steamed."
       },
-      "image": "images/menu/c14.jpg"
+      "image": "images/menu/d14.jpg"
     },
     {
       "name": {
@@ -178,7 +178,7 @@
         "hu": "Tempura, tavaszi tekercs, takoyaki és ropogós rántott falatok.",
         "en": "Tempura, spring rolls, takoyaki and crisp fried bites."
       },
-      "image": "images/menu/c15.jpg"
+      "image": "images/menu/d15.jpg"
     },
     {
       "name": {
@@ -190,7 +190,7 @@
         "hu": "Gőzölgő rizs angolnával vagy rántott sertéskarajjal.",
         "en": "Steaming rice topped with eel or a pork chop."
       },
-      "image": "images/menu/c16.jpg"
+      "image": "images/menu/d16.jpg"
     },
     {
       "name": {
@@ -202,7 +202,7 @@
         "hu": "Forró wokban pirított rizs zöldséggel, csirkével, tenger gyümölcseivel vagy fekete szarvasgombával.",
         "en": "Rice tossed in a fiery wok with vegetables, chicken, seafood or black truffle."
       },
-      "image": "images/menu/c17.jpg"
+      "image": "images/menu/d17.jpg"
     },
     {
       "name": {
@@ -214,7 +214,7 @@
         "hu": "Vastag, puha udontészta wokban pirítva.",
         "en": "Thick, soft udon noodles tossed in the wok."
       },
-      "image": "images/menu/c20.jpg"
+      "image": "images/menu/d18.jpg"
     },
     {
       "name": {
@@ -226,7 +226,7 @@
         "hu": "Forró vaslapon sütött gyoza, nyárs, lazac, garnélarák és libamáj.",
         "en": "Gyoza, skewers, salmon, prawns and foie gras from the hot iron plate."
       },
-      "image": "images/menu/c21.jpg"
+      "image": "images/menu/d19.jpg"
     },
     {
       "name": {
@@ -238,7 +238,7 @@
         "hu": "Ázsiai meleg fogások marhából, csirkéből, garnélarákból és zöldségekből.",
         "en": "Asian hot dishes of beef, chicken, prawns and vegetables."
       },
-      "image": "images/menu/c22.jpg"
+      "image": "images/menu/d20.jpg"
     },
     {
       "name": {
@@ -250,7 +250,7 @@
         "hu": "Friss saláta és wakame tengeri alga.",
         "en": "Fresh salad and wakame seaweed."
       },
-      "image": "images/menu/c23.jpg"
+      "image": "images/menu/d21.jpg"
     }
   ],
   "chef": [

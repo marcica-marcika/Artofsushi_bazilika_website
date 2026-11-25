@@ -603,8 +603,10 @@ html:not(.js) .clip img{clip-path:none;transform:none}
 }
 
 /* ---------- egységes sötét tónus a régi, világos hátterű fotókon ---------- */
-.dish__img img,.feature__img img{filter:brightness(.68) contrast(1.14) saturate(.82) sepia(.1)}
-.dish__img::before,.feature__img::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+.feature__img img{filter:brightness(.68) contrast(1.14) saturate(.82) sepia(.1)}
+.dish__img{background:#0e0d0b}
+.dish__img img{object-position:center}
+.feature__img::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
   background:radial-gradient(ellipse 85% 80% at 50% 50%,transparent 38%,rgba(11,10,9,.78) 100%)}
 .feature__img{position:relative}
 .booking__bg img{filter:brightness(.3) saturate(.75) blur(2px);object-position:70% center}
