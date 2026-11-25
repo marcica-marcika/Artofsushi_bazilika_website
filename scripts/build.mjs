@@ -57,6 +57,7 @@ C.calc = {
   overlay: t(`${info.days.hu} ${times}`, `${info.days.en} ${times}`),
   daily: t(`Minden nap ${times}`, `Open daily ${times}`),
   span: Math.round(closeH - openH),
+  dur: t(`${prices.duration} óra`, `${prices.duration} hours`),
   duration_rule: t(`Az önkiszolgáló étkezés időtartama legfeljebb ${prices.duration} óra.`, `All-you-can-eat dining is limited to ${prices.duration} hours per table.`),
   service_rule: t(`${prices.service}% szervizdíjat számolunk fel.`, `A ${prices.service}% service charge is added to the bill.`),
   child: `${huNum(prices.child)} Ft`,

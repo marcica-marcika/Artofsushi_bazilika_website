@@ -1,34 +1,13 @@
 {
   "images": [
     {
-      "image": "images/gallery/g01.jpg"
-    },
-    {
-      "image": "images/gallery/g02.jpg"
-    },
-    {
-      "image": "images/gallery/g03.jpg"
-    },
-    {
       "image": "images/gallery/g04.jpg"
     },
     {
       "image": "images/gallery/g05.jpg"
     },
     {
-      "image": "images/gallery/g06.jpg"
-    },
-    {
-      "image": "images/gallery/g07.jpg"
-    },
-    {
       "image": "images/gallery/g08.jpg"
-    },
-    {
-      "image": "images/gallery/g09.jpg"
-    },
-    {
-      "image": "images/gallery/g10.jpg"
     }
   ]
 }
