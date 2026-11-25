@@ -603,7 +603,8 @@ html:not(.js) .clip img{clip-path:none;transform:none}
 }
 
 /* ---------- egységes sötét tónus a régi, világos hátterű fotókon ---------- */
-.feature__img img{filter:brightness(.68) contrast(1.14) saturate(.82) sepia(.1)}
+.feature__img{background:#0e0d0b}
+.feature__img img{object-position:center}
 .dish__img{background:#0e0d0b}
 .dish__img img{object-position:center}
 .feature__img::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
