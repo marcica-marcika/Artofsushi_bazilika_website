@@ -308,18 +308,18 @@
   // vízszintes galéria
   const hgal = $('.hgal');
   const track = $('.hgal__track');
-  const gItems = $$('.g', track);
+  const gItems = track ? $$('.g', track) : [];
   const gImgs = gItems.map(g => $('img', g));
   const gBar = $('.hgal__progress span');
   const gCount = $('.hgal__count b');
   let gDist = 0;
   function sizeGallery() {
-    if (reduce) return;
+    if (reduce || !hgal) return;
     gDist = Math.max(0, track.scrollWidth - W);
     hgal.style.height = `${gDist + H}px`;
   }
   function renderGallery() {
-    if (reduce) return;
+    if (reduce || !hgal) return;
     const r = hgal.getBoundingClientRect();
     if (r.bottom < 0 || r.top > H) return;
     const p = clamp(-r.top / (hgal.offsetHeight - H || 1));
