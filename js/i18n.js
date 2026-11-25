@@ -9,6 +9,7 @@
     // kezdőlap
     '01 — Új üzlet': '01 — New location',
     'Budapest · Szent István-bazilika': 'Budapest · St Stephen’s Basilica',
+    'Budapest · Liszt Ferenc tér': 'Budapest · Liszt Ferenc tér',
     'Belépés': 'Enter',
     'Cím': 'Address',
     'Nyitvatartás': 'Opening hours',
@@ -184,6 +185,7 @@
       failInvalid: p => `Kérjük, ellenőrizze az adatokat (e-mail, telefonszám, dátum – legfeljebb 180 nappal előre). Ha minden helyes, hívjon: ${p}.`,
       sending: 'Küldés folyamatban…',
       langName: 'magyar',
+      kitchen: 'Figyelem: a konyha 23:00-kor zár, az utolsó rendelést addig tudjuk felvenni.',
       bk: {
         eyebrow: 'Foglalási kérés elküldve', thanks: n => `Köszönjük, ${n}!`,
         guests: 'Létszám', g: n => `${n} fő`, name: 'Név', phone: 'Telefon', email: 'E-mail', note: 'Egyéb kérés', addr: 'Cím', id: 'Azonosító',
@@ -204,6 +206,7 @@
       failInvalid: p => `Please check your details (email, phone number, date – at most 180 days ahead). If everything is correct, please call ${p}.`,
       sending: 'Sending…',
       langName: 'angol',
+      kitchen: 'Please note: our kitchen closes at 23:00, last orders are taken until then.',
       bk: {
         eyebrow: 'Booking request sent', thanks: n => `Thank you, ${n}!`,
         guests: 'Guests', g: n => `${n} ${n == 1 ? 'guest' : 'guests'}`, name: 'Name', phone: 'Phone', email: 'Email', note: 'Requests', addr: 'Address', id: 'Reference',

@@ -1,66 +1,67 @@
-/* Art of Sushi Bazilika — kezdőlap: nyitás, egér-parallaxis, átmenet a Bazilika oldalra */
+/* Art of Sushi — üzletválasztó: nyitás, egér-parallaxis, átmenet */
 (() => {
   'use strict';
   const root = document.documentElement;
+  const entry = document.querySelector('.entry');
+  const shops = [...document.querySelectorAll('.shop')];
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fine = matchMedia('(hover:hover) and (pointer:fine)').matches;
-  const img = document.querySelector('.stage__media img');
 
-  // nyitó animáció: a fontok és a homlokzat képe után indul
+  // nyitó animáció: a fontok és az első kép után indul
   let started = false;
   const start = () => {
     if (started) return;
     started = true;
     requestAnimationFrame(() => requestAnimationFrame(() => {
       root.classList.add('ready');
-      setTimeout(() => root.classList.add('settled'), reduce ? 0 : 3600);
+      setTimeout(() => root.classList.add('settled'), reduce ? 0 : 3200);
     }));
   };
+  const firstImg = document.querySelector('.shop--new img');
   Promise.all([
     document.fonts ? document.fonts.ready : Promise.resolve(),
-    img.complete ? Promise.resolve() : new Promise(r => { img.onload = img.onerror = r; })
+    firstImg.complete ? Promise.resolve() : new Promise(r => { firstImg.onload = firstImg.onerror = r; })
   ]).then(start);
   setTimeout(start, 2500);
 
-  // finom egér-parallaxis a képen
+  // finom egér-parallaxis a képeken
   if (fine && !reduce) {
-    let tx = 0, ty = 0, cx = 0, cy = 0;
-    addEventListener('pointermove', e => {
-      tx = (e.clientX / innerWidth - .5) * -16;
-      ty = (e.clientY / innerHeight - .5) * -10;
-    }, { passive: true });
+    let ty = 0, cy = 0;
+    addEventListener('pointermove', e => { ty = (e.clientY / innerHeight - .5) * -18; }, { passive: true });
     const loop = () => {
-      cx += (tx - cx) * .05; cy += (ty - cy) * .05;
-      img.style.setProperty('--px', `${cx.toFixed(2)}px`);
-      img.style.setProperty('--py', `${cy.toFixed(2)}px`);
+      cy += (ty - cy) * .06;
+      shops.forEach((s, i) => s.style.setProperty('--py', `${(i ? -cy : cy).toFixed(2)}px`));
       requestAnimationFrame(loop);
     };
     loop();
   }
 
-  // a Bazilika oldal előtöltése (egér a gombon, vagy mobilon pár mp után)
+  // a Bazilika oldal előtöltése, ha az egér odaér
   let prefetched = false;
-  const prefetch = () => {
+  shops[0].addEventListener('pointerenter', () => {
     if (prefetched) return;
     prefetched = true;
     const l = document.createElement('link');
     l.rel = 'prefetch'; l.href = 'bazilika.html';
     document.head.appendChild(l);
-  };
-  document.querySelectorAll('[data-go]').forEach(a => a.addEventListener('pointerenter', prefetch));
-  setTimeout(prefetch, 4000);
+  });
 
-  // kattintás: a kép közelebb jön, elsötétül, majd továbblép
-  document.querySelectorAll('[data-go]').forEach(a => a.addEventListener('click', e => {
+  // kattintás: a választott üzlet kitölti a képernyőt, majd továbblép
+  shops.forEach(shop => shop.addEventListener('click', e => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
     e.preventDefault();
     if (root.classList.contains('leaving')) return;
-    const href = a.getAttribute('href');
+    const href = shop.getAttribute('href');
     if (reduce) { location.href = href; return; }
+    shop.classList.add('is-chosen');
     root.classList.add('leaving');
-    setTimeout(() => { location.href = href; }, 1150);
+    setTimeout(() => { location.href = href; }, 1350);
   }));
 
   // vissza gombnál (bfcache) álljon vissza a kezdőállapot
-  addEventListener('pageshow', e => { if (e.persisted) root.classList.remove('leaving'); });
+  addEventListener('pageshow', e => {
+    if (!e.persisted) return;
+    root.classList.remove('leaving');
+    shops.forEach(s => s.classList.remove('is-chosen'));
+  });
 })();

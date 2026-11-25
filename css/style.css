@@ -331,6 +331,8 @@ html:not(.js) .clip img{clip-path:none;transform:none}
 .field--half{grid-column:span 1}
 .field input,.field select,.field textarea{width:100%;border:0;border-bottom:1px solid rgba(237,230,217,.2);background:transparent;padding:26px 0 10px;font:300 16px var(--f-body);color:var(--text);border-radius:0;outline:none;transition:border-color .4s;-webkit-appearance:none;appearance:none;color-scheme:dark}
 .field select{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c4a46c' stroke-width='1.2' fill='none'/%3E%3C/svg%3E") no-repeat right 2px center}
+.field__note{margin:10px 0 0;font-size:12.5px;line-height:1.5;color:var(--gold);letter-spacing:.01em}
+.field__note[hidden]{display:none}
 .field select option{background:var(--bg-2);color:var(--text)}
 .field textarea{resize:vertical;min-height:70px}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold)}
