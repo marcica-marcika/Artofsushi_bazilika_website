@@ -613,8 +613,8 @@
   date.max = `${far.getFullYear()}-${pad(far.getMonth() + 1)}-${pad(far.getDate())}`;
   const formShown = Date.now(); // robotszűrés: 3 mp-en belül beküldött űrlapot a szerver eldob
   // időpontok egész óránként, nyitástól zárás előtt 2 óráig (nincs :30) – kivéve:
-  //  • péntek, szombat, vasárnap: 15:00-ig óránként, utána kétórás sávok
-  //    (16:00–18:00, 18:00–20:00, 20:00–22:00), majd 22:00 (17, 19, 21 nincs)
+  //  • péntek, szombat, vasárnap: 15:00-ig óránként, utána kétóránként:
+  //    csak 16:00, 18:00, 20:00 és 22:00 (17, 19, 21 nincs; sávot nem írunk ki)
   //  • 22:00 választásakor figyelmeztetés: a konyha 23:00-kor zár (minden nap, kivéve febr. 14.)
   //  • minden év február 14.: csak 12:00, 14:00, 16:00, 18:00, 20:00, 22:00 (nincs figyelmeztetés)
   const WEEKEND_DAYS = [5, 6, 0];
@@ -630,7 +630,7 @@
       return { list: [range(12, 14), range(14, 16), range(16, 18), range(18, 20), range(20, 22), [hm(22), hm(22)]] };
     const dow = new Date(+m[1], m[2] - 1, +m[3]).getDay();
     if (WEEKEND_DAYS.includes(dow))
-      return { list: [...hours(first, 15), range(16, 18), range(18, 20), range(20, 22), [hm(22), hm(22)]], kitchen: true };
+      return { list: [...hours(first, 15), ...[16, 18, 20, 22].map(h => [hm(h), hm(h)])], kitchen: true };
     return { list: hours(first, last), kitchen: true };
   };
   const timeNote = $('#f-time-note');
