@@ -195,7 +195,7 @@
       bk: {
         eyebrow: 'Foglalási kérés elküldve', thanks: n => `Köszönjük, ${n}!`,
         guests: 'Létszám', g: n => `${n} fő`, name: 'Név', phone: 'Telefon', email: 'E-mail', note: 'Egyéb kérés', addr: 'Cím', id: 'Azonosító',
-        info: p => `Hamarosan e-mailben visszaigazoljuk a foglalást – addig ez még csak kérés. Ha valami változik, hívjon minket: ${p}.`,
+        info: p => `Kérését megkaptuk. Amint visszaigazoltuk, e-mailt küldünk – addig ez még csak kérés. Ha valami változik, hívjon minket: ${p}.`,
         ok: 'Rendben', close: 'Bezárás', locale: 'hu-HU'
       }
     },
@@ -216,7 +216,7 @@
       bk: {
         eyebrow: 'Booking request sent', thanks: n => `Thank you, ${n}!`,
         guests: 'Guests', g: n => `${n} ${n == 1 ? 'guest' : 'guests'}`, name: 'Name', phone: 'Phone', email: 'Email', note: 'Requests', addr: 'Address', id: 'Reference',
-        info: p => `We will confirm your booking by email shortly – until then it is a request. If anything changes, please call us on ${p}.`,
+        info: p => `We have received your request. We will email you as soon as it is confirmed – until then it is a request. If anything changes, please call us on ${p}.`,
         ok: 'OK', close: 'Close', locale: 'en-GB'
       }
     }

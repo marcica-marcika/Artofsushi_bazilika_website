@@ -35,7 +35,6 @@ const CFG = {
   WEEKEND_DAYS: [5, 6, 0],
   WEEKEND_SLOTS: {},       // 2026-11-28: Marcell kérésére sávot nem írunk ki, csak a kezdési időt
   VALENTINE_SLOTS: {},     // febr. 14.: 12, 14, 16, 18, 20, 22 – csak kezdési idő, sáv nélkül
-  GMAIL_RESERVE: 15,       // csak Gmail esetén: a vendég automatikus „megkaptuk” levele csak akkor megy, ha ennél több marad (a visszaigazolásoknak)
   NOTIFY_RESERVE: 40,      // a bolt értesítője Gmailből csak akkor, ha ennél több marad
   BACKUP_KEEP_DAYS: 14     // a „Mentés 备份” biztonsági lapok ennyi nap után törlődnek (személyes adatok!)
 };
@@ -97,7 +96,7 @@ function doPost(e) {
       // ugyanaz a foglalás még egyszer (dupla kattintás, újraküldés, újratöltés után): nem lesz új sor, nincs új e-mail
       const dup = findDuplicate_(sh, b);
       if (dup.id) return json_({ ok: true, id: dup.id, duplicate: true });
-      // tömeges / ismételt beküldés ellen (a Gmail napi kerete véges, és a vendégnek automatikus levél megy)
+      // tömeges / ismételt beküldés ellen (a táblázat ne teljen meg szeméttel)
       if (!allow_(b)) return json_({ ok: false, error: 'limit' });
       // ugyanaz a vendég ugyanarra a napra más időpontra: rögzítjük, de jelöljük
       if (dup.otherTimes.length) b.flag = `⚠ Ugyanaz a vendég aznap már: ${dup.otherTimes.join(', ')} · 同一客人当天已订 ${dup.otherTimes.join(', ')}`;
@@ -122,9 +121,10 @@ function doPost(e) {
       ensureDayTabs_();
     } finally { lock.releaseLock(); }
 
-    // a foglalás már mentve van: egy e-mail hiba (pl. elfogyott a napi keret) ne jelenjen meg hibaként a vendégnek
-    // előbb a vendég levele (fontosabb), aztán a bolt értesítője (csak ha van rá keret)
-    try { sendGuest_('received', b, { reserve: CFG.GMAIL_RESERVE }); } catch (err) { console.error('guest', err); }
+    // 2026-11-28: a vendég beküldéskor NEM kap automatikus „megkaptuk” levelet (napi levélkeret spórolás) —
+    // e-mailt csak akkor kap, amikor az Állapot oszlopban visszaigazoljuk / elutasítjuk (onStatusEdit).
+    // A bolt értesítője alapból ki van kapcsolva (csak NOTIFY_MAIL=on vagy Brevo esetén megy).
+    // A foglalás már mentve van: egy e-mail hiba ne jelenjen meg hibaként a vendégnek.
     try { notifyRestaurant_(b); } catch (err) { console.error('notify', err); }
     return json_({ ok: true, id: b.id });
   } catch (err) {
@@ -225,6 +225,7 @@ function fmtDate_(dt, lang) {
 }
 
 const TPL = {
+  // „received”: már nem küldjük (2026-11-28), de a tárgya kell, hogy a régi automatikus levelek ne számítsanak vendéglevélnek
   received: {
     hu: { subject: 'Foglalási kérését megkaptuk', lead: 'Köszönjük foglalási kérését! Hamarosan visszaigazoljuk e-mailben. Az alábbi adatokat kaptuk:', foot: 'Ha sürgős, hívjon minket:' },
     en: { subject: 'We have received your booking request', lead: 'Thank you for your booking request. We will confirm it by email shortly. These are the details we received:', foot: 'If it is urgent, please call us on' }
