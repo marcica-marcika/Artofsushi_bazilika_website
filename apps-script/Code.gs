@@ -34,7 +34,7 @@ const CFG = {
   WEEKEND_FROM: '2026-11-28',  // ettől péntek, szombat, vasárnap este: 16:00, 18:00, 20:00, 22:00 (csak kezdési idő)
   WEEKEND_DAYS: [5, 6, 0],
   WEEKEND_SLOTS: {},       // 2026-11-28: Marcell kérésére sávot nem írunk ki, csak a kezdési időt
-  VALENTINE_SLOTS: { '12:00': '12:00–14:00', '14:00': '14:00–16:00', '16:00': '16:00–18:00', '18:00': '18:00–20:00', '20:00': '20:00–22:00' },
+  VALENTINE_SLOTS: {},     // febr. 14.: 12, 14, 16, 18, 20, 22 – csak kezdési idő, sáv nélkül
   GMAIL_RESERVE: 15,       // csak Gmail esetén: a vendég automatikus „megkaptuk” levele csak akkor megy, ha ennél több marad (a visszaigazolásoknak)
   NOTIFY_RESERVE: 40,      // a bolt értesítője Gmailből csak akkor, ha ennél több marad
   BACKUP_KEEP_DAYS: 14     // a „Mentés 备份” biztonsági lapok ennyi nap után törlődnek (személyes adatok!)

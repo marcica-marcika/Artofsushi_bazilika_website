@@ -620,14 +620,13 @@
   const WEEKEND_DAYS = [5, 6, 0];
   const KITCHEN_LATE = ['22:00'];
   const hm = x => `${pad(Math.floor(x) % 24)}:00`;
-  const range = (a, b) => [hm(a), `${hm(a)} – ${hm(b)}`];
   const hours = (from, to) => { const o = []; for (let x = from; x <= to; x++) o.push([hm(x), hm(x)]); return o; };
   const timesFor = v => {
     const first = Math.ceil(CONFIG.OPEN_HOUR), last = Math.floor(CONFIG.CLOSE_HOUR - 2);
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || '');
     if (!m) return { list: hours(first, last), kitchen: true };
     if (m[2] === '02' && m[3] === '14')
-      return { list: [range(12, 14), range(14, 16), range(16, 18), range(18, 20), range(20, 22), [hm(22), hm(22)]] };
+      return { list: [12, 14, 16, 18, 20, 22].map(h => [hm(h), hm(h)]) };
     const dow = new Date(+m[1], m[2] - 1, +m[3]).getDay();
     if (WEEKEND_DAYS.includes(dow))
       return { list: [...hours(first, 15), ...[16, 18, 20, 22].map(h => [hm(h), hm(h)])], kitchen: true };
