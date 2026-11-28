@@ -372,6 +372,8 @@ html:not(.js) .clip img{clip-path:none;transform:none}
 .contact__list dd{margin:0;font:300 23px/1.4 var(--f-display)}
 .contact__list a{text-decoration:none;transition:color .3s}
 .contact__list a:hover{color:var(--gold)}
+.contact__list .mail,.footer__cols .mail,.overlay__foot .mail{overflow-wrap:anywhere}
+.contact__list .mail{font-size:.78em}
 .socials{display:flex;flex-direction:column}
 .status-pill{display:inline-flex;margin-top:10px;font:400 10px var(--f-body);letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
 .status-pill.is-open{color:var(--gold)}

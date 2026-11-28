@@ -6,7 +6,7 @@
 //
 // Jelölések a HTML-ben:
 //   data-cms="kulcs"              → az elem tartalma = a kulcs magyar szövege; az angol pár a nyelvváltóba kerül
-//   data-cms-attr="href=kulcs|tel; src=kulcs"  → attribútumok (szűrők: tel, num, huf)
+//   data-cms-attr="href=kulcs|tel|mail; src=kulcs"  → attribútumok (szűrők: tel, mail, num, huf)
 //   data-cms-list="kulcs"         → lista: az első gyermekelem a minta, elemenként megismételve
 //     a mintán belül ".mező" az aktuális elemre, "#" a sorszámra (01, 02 …) mutat
 //   data-cms-if="kulcs"           → az elem csak akkor marad meg, ha a kulcs értéke igaz
@@ -33,6 +33,7 @@ const jpOk = new Set(fs.readFileSync(path.join(ROOT, 'scripts', 'jp-chars.txt'),
 const jpNew = [...new Set([...(C.menu.categories || []), ...(C.menu.chef || [])].flatMap(x => [...(x.jp || '')]))].filter(ch => !jpOk.has(ch));
 const DATE = /^(\d{4}-\d{2}-\d{2})?$/;
 if (!DATE.test(C.notice.from || '') || !DATE.test(C.notice.to || '')) fail('A közlemény dátuma ÉÉÉÉ-HH-NN legyen, vagy üres.');
+if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(C.info.email || '').trim())) fail('Hibás e-mail cím.');
 if (!C.info.phone || !/\d{6,}/.test(String(C.info.phone).replace(/\D/g, ''))) fail('Hibás telefonszám.');
 for (const x of [...(C.menu.categories || []), ...(C.menu.chef || []), ...(C.gallery.images || [])]) {
   const p = String(x.image || '').replace(/^\/+/, '');
@@ -90,6 +91,7 @@ function lookup(key, scope, index) {
 const huOf = v => (v && typeof v === 'object' && 'hu' in v) ? v.hu : v;
 const FILTERS = {
   tel: v => 'tel:' + String(v).replace(/[^\d+]/g, ''),
+  mail: v => 'mailto:' + String(v).trim(),
   num: v => String(Number(v)),
   huf: v => `${huNum(v)} Ft`,
   img,
@@ -207,6 +209,7 @@ for (const p of PAGES) {
     return `<html${a}>`;
   });
   html = html.replace(/"telephone":\s*"[^"]*"/, `"telephone": "${FILTERS.tel(info.phone).slice(4)}"`);
+  html = html.replace(/"email":\s*"[^"]*"/, `"email": "${String(info.email).trim()}"`);
   html = html.replace(/"opens":\s*"[^"]*","closes":\s*"[^"]*"/, `"opens": "${info.open}","closes": "${info.close === '00:00' ? '23:59' : info.close}"`);
   html = html.replace(/"sameAs":\s*\[[^\]]*\]/, `"sameAs": ${JSON.stringify([info.facebook, info.instagram, info.tiktok].filter(Boolean)).replace(/,/g, ',')}`);
   fs.writeFileSync(path.join(OUT, p), html);

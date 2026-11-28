@@ -113,6 +113,7 @@
     'Kapcsolat': 'Contact',
     'Itt talál minket': 'Find us',
     'Telefon': 'Phone',
+    'Telefon · E-mail': 'Phone · Email',
     'Követés': 'Follow us',
     'Útvonaltervezés': 'Get directions',
     'Testvérüzletünk: Liszt Ferenc tér 5, 1061 ·': 'Our sister restaurant: Liszt Ferenc tér 5, 1061 ·',
