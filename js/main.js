@@ -613,8 +613,8 @@
   date.max = `${far.getFullYear()}-${pad(far.getMonth() + 1)}-${pad(far.getDate())}`;
   const formShown = Date.now(); // robotszűrés: 3 mp-en belül beküldött űrlapot a szerver eldob
   // időpontok félóránként, nyitástól zárás előtt 2 óráig – kivéve:
-  //  • 2026-11-28-tól péntek, szombat, vasárnap: 16 óráig félóránként, utána kétórás sávok
-  //    (16:00–18:00, 18:00–20:00, 20:00–22:00), majd 22:00 
+  //  • 2026-11-28-tól péntek, szombat, vasárnap: 16 óráig félóránként, utána csak 16:00, 18:00, 20:00, 22:00
+  //    (sima időpontok, sávok nélkül)
   //  • 2026-11-27-ig péntek és szombat: 17:00–19:00, 19:00–21:00, utána félóránként (21:30, 22:00)
   //  • 22:00 / 22:30 választásakor figyelmeztetés: a konyha 23:00-kor zár (minden nap, kivéve febr. 14.)
   //  • minden év február 14.: csak 12:00, 14:00, 16:00, 18:00, 20:00, 22:00 (nincs 22:30, nincs figyelmeztetés)
@@ -631,7 +631,7 @@
       return { list: [range(12, 14), range(14, 16), range(16, 18), range(18, 20), range(20, 22), [hm(22), hm(22)]] };
     const dow = new Date(+m[1], m[2] - 1, +m[3]).getDay();
     if (v >= WEEKEND_FROM && WEEKEND_DAYS.includes(dow))
-      return { list: [...halfHours(first, 15.5), range(16, 18), range(18, 20), range(20, 22), [hm(22), hm(22)]], kitchen: true };
+      return { list: [...halfHours(first, 15.5), ...[16, 18, 20, 22].map(h => [hm(h), hm(h)])], kitchen: true };
     if (v < WEEKEND_FROM && OLD_SLOT_DAYS.includes(dow))
       return { list: [...halfHours(first, 16.5), range(17, 19), range(19, 21), ...halfHours(21.5, last)], kitchen: true };
     return { list: halfHours(first, last), kitchen: true };
@@ -697,7 +697,7 @@
     if (!ok) { msg.classList.add('err'); msg.textContent = T('formErr'); return; }
     const data = Object.fromEntries(new FormData(form));
     data.guests = guests;
-    const shownTime = timeLabel();   // hétvégén este a sáv: „18:00 – 20:00”
+    const shownTime = timeLabel();   // febr. 14-én a sáv: „18:00 – 20:00”
     let bookedId = '';
     const summary = `Asztalfoglalás – Art of Sushi Bazilika
 Név: ${data.name}

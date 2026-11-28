@@ -31,9 +31,9 @@ const CFG = {
   MIN_FILL_MS: 3000,       // ennél gyorsabban kitöltött űrlap = robot
   SLOT_DAYS: [5, 6],       // 2026-11-27-ig péntek, szombat: este kétórás sávok
   SLOTS: { '17:00': '17:00–19:00', '19:00': '19:00–21:00' },
-  WEEKEND_FROM: '2026-11-28',  // ettől péntek, szombat, vasárnap: 16–18, 18–20, 20–22, majd 22:00
+  WEEKEND_FROM: '2026-11-28',  // ettől péntek, szombat, vasárnap este: 16:00, 18:00, 20:00, 22:00 (sima időpontok)
   WEEKEND_DAYS: [5, 6, 0],
-  WEEKEND_SLOTS: { '16:00': '16:00–18:00', '18:00': '18:00–20:00', '20:00': '20:00–22:00' },
+  WEEKEND_SLOTS: {},           // üres: a levélben is csak a kezdés áll („18:00”), sáv nélkül
   VALENTINE_SLOTS: { '12:00': '12:00–14:00', '14:00': '14:00–16:00', '16:00': '16:00–18:00', '18:00': '18:00–20:00', '20:00': '20:00–22:00' },
   GMAIL_RESERVE: 15,       // csak Gmail esetén: a vendég automatikus „megkaptuk” levele csak akkor megy, ha ennél több marad (a visszaigazolásoknak)
   NOTIFY_RESERVE: 40,      // a bolt értesítője Gmailből csak akkor, ha ennél több marad
@@ -195,7 +195,7 @@ function clean_(d) {
   return { name, email, phone, date, time, note, guests, lang, dateObj, id };
 }
 
-// hétvégén este a táblázatban csak a kezdés áll („18:00”), a vendég levelében a teljes sáv („18:00–20:00”)
+// febr. 14-én (és 2026-11-27-ig pénteken, szombaton) a vendég levelében a teljes sáv áll („18:00–20:00”), a táblázatban csak a kezdés
 function slotLabel_(dateObj, time) {
   const t = String(time || '');
   if (!(dateObj instanceof Date)) return t;
